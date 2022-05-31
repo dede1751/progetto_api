@@ -41,7 +41,7 @@ static void left_rotate(dict_ptr D, node_ptr x){
     y->left = x;
     x->parent = y;
 }
-static void right_rotate(dict_ptr T, node_ptr x){
+static void right_rotate(dict_ptr D, node_ptr x){
     node_ptr y = x->left;
 
     x->left = y->right;
