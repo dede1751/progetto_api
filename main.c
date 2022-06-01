@@ -34,5 +34,7 @@ int main(){
     } while(restart == 1);
 
     free_dict(word_dict);
+
+    //scanf("c");
     exit(EXIT_SUCCESS);
 }

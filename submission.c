@@ -262,6 +262,7 @@ void print_list(dict_ptr T){
 void free_tree(node_ptr curr, node_ptr NIL){
     if (curr->left != NIL) free_tree(curr->left, NIL);
     if (curr->right != NIL) free_tree(curr->right, NIL);
+    free(curr->word);
     free(curr);
 }
 void empty_blocks(node_ptr curr){

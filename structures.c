@@ -183,6 +183,7 @@ void print_list(dict_ptr T, FILE *output){
 static void free_tree(node_ptr curr, node_ptr NIL){ //postorder traversal
     if (curr->left != NIL) free_tree(curr->left, NIL);
     if (curr->right != NIL) free_tree(curr->right, NIL);
+    free(curr->word);
     free(curr);
 }
 static void empty_blocks(node_ptr curr){ //linear traversal, resets .next fields
