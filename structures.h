@@ -58,11 +58,8 @@ uint8_t search(dict_ptr, char*);
  *  - list is single linked and reuses string pointers for small footprint
  *     (double link unnecessary because deletion is done sequentially over
  *      the whole list)
- *  - fill_list parses the tree in reverse order and sequentially builds the
- *     list from it
  *  - for further insertions ordered-insert is used
  */
-void fill_list(dict_ptr, node_ptr);
 void ordered_insert(dict_ptr, node_ptr);
 void print_list(dict_ptr, FILE *);
     

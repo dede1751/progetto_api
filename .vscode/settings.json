@@ -1,0 +1,20 @@
+{
+    "C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools",
+    "makefile.buildBeforeLaunch": true,
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "/Users/andreasgobbi/Documents/uni_works/progetto_api/debug",
+            "binaryPath": "/Users/andreasgobbi/Documents/uni_works/progetto_api/debug/build",
+            "binaryArgs": [],
+            "stopAtEntry": true,
+        }
+    ],
+    "files.associations": {
+        "stdint.h": "c",
+        "__functional_base": "c",
+        "game.h": "c",
+        "structures.h": "c",
+        "string.h": "c"
+    },
+    "C_Cpp.errorSquiggles": "Disabled",
+}

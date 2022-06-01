@@ -9,6 +9,7 @@ static uint8_t check_req(char *, req_ptr);
 static void filter_req(dict_ptr, req_ptr);
 static void free_req(req_ptr);
 
+static void fill_list(dict_ptr, node_ptr, req_ptr);
 static void check_guess(dict_ptr, char *, char *, int, req_ptr, FILE *);
 static void handle_insert(dict_ptr, int, req_ptr, FILE *);
 
@@ -31,13 +32,10 @@ static uint8_t map_charset(char c){
 
 
 static char *calculate_eval(char *ref, char *s, int wordsize){
-    char *eval = (char *)malloc((wordsize + 1) * sizeof(char));
+    char *eval = (char *)calloc(wordsize + 1, sizeof(char));
     uint8_t counts[CHARSET] = {0}; // possible of but gambling for memory
     int i;
     
-    for(i = 0; i < wordsize; ++i) eval[i] = '-';
-    eval[wordsize] = '\0';
-
     // count char occurrences in ref
     for(i = 0; i < wordsize; ++i) ++(counts[map_charset(ref[i])]);
 
@@ -51,7 +49,7 @@ static char *calculate_eval(char *ref, char *s, int wordsize){
 
     // handle imperfect matches
     for (i = 0; i < wordsize; ++i){
-        if (eval[i] == '-'){
+        if (eval[i] == 0){
             if (counts[map_charset(s[i])] > 0){
                 eval[i] = '|';
                 --(counts[map_charset(s[i])]);
@@ -162,6 +160,7 @@ static void filter_req(dict_ptr D, req_ptr reqs){
     }
 }
 
+
 static void free_req(req_ptr reqs){
     int i;
     
@@ -170,13 +169,30 @@ static void free_req(req_ptr reqs){
     free(reqs);
 }
 
+// lazy filling, walks through tree in reverse order
+static void fill_list(dict_ptr D, node_ptr x, req_ptr reqs){
+    if (x != D->NIL){
+        fill_list(D, x->right, reqs);
+
+        if (check_req(x->word, reqs) == 1){
+            x->next = D->head;
+            D->head = x;
+            ++(D->len);
+        }
+
+        fill_list(D, x->left, reqs);
+    }
+}
+
+
 static void check_guess(dict_ptr D, char *ref, char *s, int wordsize, req_ptr reqs, FILE *output){
     char *eval;
 
     // checking guesses is O(l*m), but l is rapidly decreasing
     eval = calculate_eval(ref, s, wordsize); // O(2m + 64)   m = wordsize
-    calculate_req(s, eval, reqs); // O(m + 128)
-    filter_req(D, reqs);          // O(l * (m + 64)) l = L->len
+    calculate_req(s, eval, reqs);            // O(m + 128)
+    if (D->head == NULL) fill_list(D, D->root, reqs);
+    else filter_req(D, reqs);                // O(l * (m + 64)) l = L->len
 
     fputs(eval, output);
     fputs("\n",output);
@@ -189,6 +205,9 @@ static void handle_insert(dict_ptr D, int wordsize, req_ptr reqs, FILE *input){
     node_ptr new;
     char *buff = (char *)malloc((wordsize + 1) * sizeof(char));
 
+    // in case insertion is done before the first guess
+    if (D->head == NULL) fill_list(D, D->root, reqs);
+    
     safe_fgets(buff, wordsize, input);
     while(buff[0] != '+'){ // +inserisci_fine
         new = insert(D, buff);
@@ -209,7 +228,6 @@ uint8_t new_game(dict_ptr D, int wordsize, FILE *input, FILE *output){
     char *ref = (char *)malloc((wordsize + 1) * sizeof(char));
     int guesses;
 
-    fill_list(D, D->root); // fill list in order
     generate_req(requirements, wordsize);  // instantiate requirements struct
 
     safe_fgets(ref, wordsize, input);
@@ -222,6 +240,7 @@ uint8_t new_game(dict_ptr D, int wordsize, FILE *input, FILE *output){
         if(buff[0] == '+'){
             if (buff[1] == 's'){ // +stampa_filtrate
                 if (wordsize <= 16) while (fgetc(input) != '\n');
+                if (D->head == NULL) fill_list(D, D->root, requirements);
                 print_list(D, output);
             } else if (buff[1] == 'i'){ // +inserisci_inizio
                 if (wordsize <= 17) while (fgetc(input) != '\n');

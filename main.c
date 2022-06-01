@@ -10,11 +10,10 @@
 
 int main(){
     dict_ptr word_dict = generate_dict();
-    node_ptr new;
     char *buff;
     int wordsize, restart;
-    FILE *input = fopen("dum_e/test3.txt", "r");
-    FILE *output = fopen("dum_e/dump.txt", "w");
+    FILE *input = fopen("/Users/andreasgobbi/Documents/uni_works/progetto_api/dum_e/test3.txt", "r");
+    FILE *output = fopen("/Users/andreasgobbi/Documents/uni_works/progetto_api/dum_e/dump.txt", "w");
 
     // save initial wordlist on the tree
     safe_scanf(&wordsize, input);
@@ -22,7 +21,7 @@ int main(){
     buff = (char *) malloc((wordsize + 1) * sizeof(char));
     safe_fgets(buff, wordsize, input);
     while (buff[0] != '+'){
-        new = insert(word_dict, buff);
+        if (insert(word_dict, buff) == NULL) exit(EXIT_FAILURE);
 
         buff = (char *) malloc((wordsize + 1) * sizeof(char));
         fgetc(input); //trailing \n

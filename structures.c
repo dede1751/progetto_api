@@ -153,21 +153,6 @@ uint8_t search(dict_ptr D, char* s){
 }
 
 
-
-// walks through tree in reverse order and adds each element to the list
-void fill_list(dict_ptr D, node_ptr x){
-    if (x != D->NIL){
-        fill_list(D, x->right);
-
-        x->next = D->head;
-        D->head = x;
-        ++(D->len);
-
-        fill_list(D, x->left);
-    }
-}
-
-
 void ordered_insert(dict_ptr D, node_ptr x){
     node_ptr curr, prev;
 
