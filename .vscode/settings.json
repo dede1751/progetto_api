@@ -14,7 +14,9 @@
         "__functional_base": "c",
         "game.h": "c",
         "structures.h": "c",
-        "string.h": "c"
+        "string.h": "c",
+        "__node_handle": "c",
+        "ios": "c"
     },
     "C_Cpp.errorSquiggles": "Disabled",
 }

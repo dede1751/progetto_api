@@ -112,6 +112,8 @@ node_ptr insert(dict_ptr T, char *s){
     node_ptr curr, prev, new;
     int i;
 
+    clock_t start = clock();
+
     curr = T->root;
     prev = T->NIL;
     while(curr != T->NIL){
@@ -134,6 +136,9 @@ node_ptr insert(dict_ptr T, char *s){
     else prev->left = new;
 
     insert_fixup(T, new);
+
+    clock_t stop = clock();
+    insert_time += (double)(stop - start) * 1000.0 / CLOCKS_PER_SEC;
     return new;
 }
 
@@ -142,20 +147,29 @@ uint8_t search(dict_ptr D, char* s){
     node_ptr curr;
     int i;
 
+    clock_t start = clock();
+
     curr = D->root;
     while(curr != D->NIL){
         i = strcmp(s, curr->word);
-        if (i == 0) return 1;
+        if (i == 0) {
+            clock_t stop = clock();
+            search_time += (double)(stop - start) * 1000.0 / CLOCKS_PER_SEC;
+            return 1;
+        }
         else if (i > 0) curr = curr->right;
         else curr = curr->left;
     }
+
+    clock_t stop = clock();
+    search_time += (double)(stop - start) * 1000.0 / CLOCKS_PER_SEC;
     return 0;
 }
 
 
 void ordered_insert(dict_ptr D, node_ptr x){
     node_ptr curr, prev;
-
+    clock_t start = clock();
     curr = D->head;
     prev = NULL;
     while(curr != NULL && strcmp(x->word, curr->word) > 0){
@@ -168,14 +182,29 @@ void ordered_insert(dict_ptr D, node_ptr x){
     else if (prev != NULL) prev->next = x;
     
     ++(D->len);
+    clock_t stop = clock();
+    insert_ord_time += (double)(stop - start) * 1000.0 / CLOCKS_PER_SEC;
 }
 
 void print_list(dict_ptr T, FILE *output){
     node_ptr curr;
-
+    clock_t start = clock();
     for (curr = T->head; curr != NULL; curr = curr->next){
         fputs(curr->word, output);
         fputs("\n", output);
+    }
+    clock_t stop = clock();
+    print_time += (double)(stop - start) * 1000.0 / CLOCKS_PER_SEC;
+}
+
+void print_tree(dict_ptr D, node_ptr x, FILE *output){
+    if (x != D->NIL){
+        print_tree(D, x->left, output);
+
+        fputs(x->word, output);
+        fputs("\n", output);
+
+        print_tree(D, x->right, output);
     }
 }
 
@@ -206,3 +235,37 @@ void free_dict(dict_ptr D){
     free(D->NIL);
     free(D);
 }
+
+
+void swap(node_ptr *arr, int a, int b){
+    node_ptr temp;
+    temp = arr[a];
+    arr[a] = arr[b];
+    arr[b] = temp;
+}
+
+// int partition(node_ptr *arr, int start, int end){
+//     char *pivot;
+//     int i, j;
+
+//     // Hoare partitioning, middle element as pivot
+//     pivot = arr[(start + end) / 2]->word;
+
+//     while (1){
+//         do ++i;
+//         while (strcmp(arr[i]->word, pivot) < 0);
+
+//         do --j;
+//         while (strcmp(arr[j]->word, pivot) < 0);
+//         if (i >= j) return j;
+//         swap(arr, i, j)
+//     }
+// }
+
+// void quicksort(node_ptr *arr, int start, int end){
+//     if (start >= 0 && end >= 0 && start < end){
+//         pivot = partition(arr, start, end);
+//         quicksort(arr, start, pivot);
+//         quicksort(arr, pivot + 1, end);
+//     }
+// }

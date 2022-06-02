@@ -191,13 +191,21 @@ static void check_guess(dict_ptr D, char *ref, char *s, int wordsize, req_ptr re
     // checking guesses is O(l*m), but l is rapidly decreasing
     eval = calculate_eval(ref, s, wordsize); // O(2m + 64)   m = wordsize
     calculate_req(s, eval, reqs);            // O(m + 128)
-    if (D->head == NULL) fill_list(D, D->root, reqs);
-    else filter_req(D, reqs);                // O(l * (m + 64)) l = L->len
-
+    if (D->head == NULL){
+        clock_t start = clock();
+        fill_list(D, D->root, reqs);
+        clock_t stop = clock();
+        fill_time += (double)(stop - start) * 1000.0 / CLOCKS_PER_SEC;
+    } else {
+        clock_t start = clock();
+        filter_req(D, reqs);                // O(l * (m + 64)) l = L->len
+        clock_t stop = clock();
+        filter_time += (double)(stop - start) * 1000.0 / CLOCKS_PER_SEC;
+    }
     fputs(eval, output);
     fputs("\n",output);
     fprintf(output, "%d\n", D->len);
-    free(eval);
+    free(eval); 
 }
 
 
@@ -205,8 +213,8 @@ static void handle_insert(dict_ptr D, int wordsize, req_ptr reqs, FILE *input){
     node_ptr new;
     char *buff = (char *)malloc((wordsize + 1) * sizeof(char));
 
-    // in case insertion is done before the first guess
-    if (D->head == NULL) fill_list(D, D->root, reqs);
+    // don't add to list if it hasn't been created yet
+    if (D->head == NULL) reqs = NULL;
     
     safe_fgets(buff, wordsize, input);
     while(buff[0] != '+'){ // +inserisci_fine
@@ -240,8 +248,8 @@ uint8_t new_game(dict_ptr D, int wordsize, FILE *input, FILE *output){
         if(buff[0] == '+'){
             if (buff[1] == 's'){ // +stampa_filtrate
                 if (wordsize <= 16) while (fgetc(input) != '\n');
-                if (D->head == NULL) fill_list(D, D->root, requirements);
-                print_list(D, output);
+                if (D->head == NULL) print_tree(D, D->root, output);
+                else print_list(D, output);
             } else if (buff[1] == 'i'){ // +inserisci_inizio
                 if (wordsize <= 17) while (fgetc(input) != '\n');
                 handle_insert(D, wordsize, requirements, input);

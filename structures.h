@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <time.h>
 
 /*
  *      STRUCTURES:
@@ -43,6 +44,14 @@ typedef struct dict {
 
 typedef dict_t *dict_ptr;
 
+extern double insert_time;
+extern double insert_ord_time;
+extern double search_time;
+extern double fill_time;
+extern double filter_time;
+extern double total_time;
+extern double print_time;
+
 dict_ptr generate_dict();
 
 /*
@@ -52,6 +61,7 @@ dict_ptr generate_dict();
  */
 node_ptr insert(dict_ptr, char*);
 uint8_t search(dict_ptr, char*);
+void print_tree(dict_ptr, node_ptr, FILE *);
 
 /*
  *      LINKED LIST OPERATIONS ---- O(n):
