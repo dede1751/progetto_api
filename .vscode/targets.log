@@ -7,7 +7,7 @@
 
 # This program built for i386-apple-darwin11.3.0
 
-# Make data base, printed on Thu Jun  2 20:15:05 2022
+# Make data base, printed on Sat Jun  4 09:27:19 2022
 
 # Variables
 
@@ -48,7 +48,7 @@ VSCODE_VERBOSE_LOGGING = true
 # environment
 __CFBundleIdentifier = com.microsoft.VSCode
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /var/folders/ly/gvds2pl55pdfcyhc7xjh6g9m0000gn/T/vscode-ipc-89e624a2-4afd-421a-83d1-5506dc40bd1b.sock
+VSCODE_IPC_HOOK_EXTHOST = /var/folders/ly/gvds2pl55pdfcyhc7xjh6g9m0000gn/T/vscode-ipc-f1316a98-1857-43bb-8f7c-7bb43580006b.sock
 # environment
 VSCODE_CWD = /
 # environment
@@ -160,7 +160,7 @@ MAKELEVEL := 0
 # environment
 LANG = C
 # environment
-VSCODE_PID = 43990
+VSCODE_PID = 49070
 # makefile (from `makefile', line 17)
 DBGDIR = debug
 # variable set hash-table stats:
@@ -350,6 +350,6 @@ debug/game.o:
 # strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
 # strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
 
-# Finished Make data base on Thu Jun  2 20:15:05 2022
+# Finished Make data base on Sat Jun  4 09:27:19 2022
 
  

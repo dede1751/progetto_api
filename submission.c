@@ -2,7 +2,11 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <time.h>
+
 #define CHARSET 64
+#define BUFSIZE 256
+
 
 typedef struct node{
     char *word;
@@ -29,6 +33,7 @@ typedef struct reqs {
 } req_t;
 typedef req_t *req_ptr;
 
+
 dict_ptr generate_dict();
 
 void left_rotate(dict_ptr, node_ptr);
@@ -37,9 +42,14 @@ void insert_fixup(dict_ptr, node_ptr);
 node_ptr insert(dict_ptr, char*);
 uint8_t search(dict_ptr, char*);
 
-void ordered_insert(dict_ptr, node_ptr);
-void print_list(dict_ptr);
+void swap(node_ptr *, node_ptr *);
+node_ptr *partition(node_ptr *, node_ptr *);
+void quicksort(node_ptr *, node_ptr *);
+void sequential_insert(dict_ptr, node_ptr *, int);
 
+void print_list(dict_ptr);
+void print_tree(dict_ptr, node_ptr);
+    
 void free_tree(node_ptr, node_ptr);
 void empty_blocks(node_ptr);
 void reset_list(dict_ptr);
@@ -48,7 +58,6 @@ void free_dict(dict_ptr);
 void safe_fgets(char *, int);
 void safe_scanf(int *);
 uint8_t map_charset(char);
-
 char *calculate_eval(char *, char *, int);
 
 void generate_req(req_ptr, int);
@@ -60,9 +69,7 @@ void free_req(req_ptr);
 void fill_list(dict_ptr, node_ptr, req_ptr);
 void check_guess(dict_ptr, char *, char *, int, req_ptr);
 void handle_insert(dict_ptr, int, req_ptr);
-
 uint8_t new_game(dict_ptr, int);
-
 
 int main(){
     dict_ptr word_dict = generate_dict();
@@ -70,7 +77,6 @@ int main(){
     int wordsize, restart;
 
     safe_scanf(&wordsize);
-  
     buff = (char *) malloc((wordsize + 1) * sizeof(char));
     safe_fgets(buff, wordsize);
     while (buff[0] != '+'){
@@ -82,14 +88,12 @@ int main(){
     }
     if (wordsize <= 14) while (getchar() != '\n');
 
-    do {
-        restart = new_game(word_dict, wordsize);
-    } while(restart == 1);
+    do restart = new_game(word_dict, wordsize);
+    while(restart == 1);
 
     free_dict(word_dict);
     exit(EXIT_SUCCESS);
 }
-
 
 dict_ptr generate_dict(){
     dict_ptr dict = (dict_ptr)malloc(sizeof(dict_t));
@@ -217,6 +221,7 @@ node_ptr insert(dict_ptr T, char *s){
     else prev->left = new;
 
     insert_fixup(T, new);
+
     return new;
 }
 
@@ -232,30 +237,86 @@ uint8_t search(dict_ptr D, char* s){
         else if (i > 0) curr = curr->right;
         else curr = curr->left;
     }
+
     return 0;
 }
 
 
-void ordered_insert(dict_ptr D, node_ptr x){
-    node_ptr curr, prev;
+void swap(node_ptr *src, node_ptr *tgt){
+    node_ptr temp = *src;
+
+    *src = *tgt;
+    *tgt = temp;
+}
+
+node_ptr *partition(node_ptr *start, node_ptr *end){
+    char *pivot;
+
+    pivot = (*(start + (end - start) / 2))->word;
+    --start;
+    ++end;
+
+    while (1){
+        while (strcmp((*(++start))->word, pivot) < 0);
+        while (strcmp((*(--end))->word, pivot) > 0);
+
+        if (start >= end) return end;
+        swap(start, end);
+    }
+}
+
+void quicksort(node_ptr *start, node_ptr *end){
+    node_ptr *pivot;
+
+    if (start < end){
+        pivot = partition(start, end);
+        quicksort(start, pivot);
+        quicksort(pivot + 1, end);
+    }
+}
+
+
+void sequential_insert(dict_ptr D, node_ptr *buffer, int len){
+    node_ptr prev, curr;
+    int i = 0;
 
     curr = D->head;
     prev = NULL;
-    while(curr != NULL && strcmp(x->word, curr->word) > 0){
-        prev = curr;
-        curr = curr->next;
+    while (curr != NULL && i < len){
+        if (strcmp(curr->word, buffer[i]->word) > 0){
+            if (prev == NULL) D->head = buffer[i];
+            else prev->next = buffer[i];
+            buffer[i]->next = curr;
+            ++i;
+            ++(D->len);
+        } else {
+            prev = curr;
+            curr = curr->next;
+        }
     }
-
-    x->next = curr;
-    if (D->head == NULL) D->head = x;
-    else if (prev != NULL) prev->next = x;
-    
-    ++(D->len);
+    while (i < len){
+        prev->next = buffer[i];
+        prev = buffer[i];
+        ++i;
+        ++(D->len);
+    }
 }
+
 
 void print_list(dict_ptr T){
     node_ptr curr;
-    for (curr = T->head; curr != NULL; curr = curr->next) puts(curr->word);
+
+    for (curr = T->head; curr != NULL; curr = curr->next){
+        puts(curr->word);
+    }
+}
+
+void print_tree(dict_ptr D, node_ptr x){
+    if (x != D->NIL){
+        print_tree(D, x->left);
+        puts(x->word);
+        print_tree(D, x->right);
+    }
 }
 
 
@@ -286,15 +347,12 @@ void free_dict(dict_ptr D){
     free(D);
 }
 
-
-
 void safe_fgets(char *s, int size){
     if (fgets(s, size + 1, stdin) == NULL) exit(EXIT_FAILURE);
 }
 void safe_scanf(int *x){
-    if (scanf("%d\n", x) == 0) exit(EXIT_FAILURE);
+    if (fscanf(stdin, "%d\n", x) == 0) exit(EXIT_FAILURE);
 }
-
 
 uint8_t map_charset(char c){
     if (c == '-') return 0;
@@ -307,10 +365,11 @@ uint8_t map_charset(char c){
 
 char *calculate_eval(char *ref, char *s, int wordsize){
     char *eval = (char *)calloc(wordsize + 1, sizeof(char));
-    uint8_t counts[CHARSET] = {0}; // possible of but gambling for memory
+    uint8_t counts[CHARSET] = {0};
     int i;
-    
+
     for(i = 0; i < wordsize; ++i) ++(counts[map_charset(ref[i])]);
+
     for (i = 0; i < wordsize; ++i){
         if (ref[i] == s[i]) {
             --(counts[map_charset(ref[i])]);
@@ -459,31 +518,45 @@ void check_guess(dict_ptr D, char *ref, char *s, int wordsize, req_ptr reqs){
 
     eval = calculate_eval(ref, s, wordsize);
     calculate_req(s, eval, reqs);
-    if (D->head == NULL) fill_list(D, D->root, reqs);
+    if (D->head == NULL)fill_list(D, D->root, reqs);
     else filter_req(D, reqs);
 
     puts(eval);
     printf("%d\n", D->len);
-    free(eval);
+    free(eval); 
 }
 
 
 void handle_insert(dict_ptr D, int wordsize, req_ptr reqs){
+    node_ptr *list_buffer = (node_ptr *)malloc(BUFSIZE * sizeof(node_ptr));
     node_ptr new;
     char *buff = (char *)malloc((wordsize + 1) * sizeof(char));
+    int i = 0, j = 1;
 
-    if (D->head == NULL) fill_list(D, D->root, reqs);
-
+    if (D->head == NULL) reqs = NULL;
+    
     safe_fgets(buff, wordsize);
-    while(buff[0] != '+'){ // +inserisci_fine
+    while(buff[0] != '+'){
         new = insert(D, buff);
-        if (reqs != NULL && check_req(buff, reqs) == 1) ordered_insert(D, new);
+        if (reqs != NULL && check_req(buff, reqs) == 1) {
+            list_buffer[i] = new;
+            ++i;
+            if (i / BUFSIZE == j){
+                list_buffer = (node_ptr *)realloc(list_buffer, j * BUFSIZE * sizeof(node_ptr));
+                ++j;
+            }
+        }
 
         getchar();
         buff = (char *)malloc((wordsize + 1) * sizeof(char));
         safe_fgets(buff, wordsize);
     }
     if (wordsize <= 15) while (getchar() != '\n');
+
+    quicksort(list_buffer, list_buffer + i - 1);
+    sequential_insert(D, list_buffer, i);
+
+    free(list_buffer);
     free(buff);
 }
 
@@ -506,8 +579,8 @@ uint8_t new_game(dict_ptr D, int wordsize){
         if(buff[0] == '+'){
             if (buff[1] == 's'){
                 if (wordsize <= 16) while (getchar() != '\n');
-                if (D->head == NULL) fill_list(D, D->root, requirements);
-                print_list(D);
+                if (D->head == NULL) print_tree(D, D->root);
+                else print_list(D);
             } else if (buff[1] == 'i'){
                 if (wordsize <= 17) while (getchar() != '\n');
                 handle_insert(D, wordsize, requirements);
@@ -515,11 +588,11 @@ uint8_t new_game(dict_ptr D, int wordsize){
 
         } else{
             getchar();
-            if (search(D, buff) == 0) puts("not_exists");
-            else if (strcmp(ref, buff) == 0) {
+            if (strcmp(ref, buff) == 0) {
                 puts("ok");
                 break;
-            } else {
+            } else if (search(D, buff) == 0) puts("not_exists");
+            else {
                 check_guess(D, ref, buff, wordsize, requirements);
                 --guesses;
             }
