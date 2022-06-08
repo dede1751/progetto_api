@@ -6,8 +6,9 @@
 # PARTICULAR PURPOSE.
 
 # This program built for i386-apple-darwin11.3.0
+ 
 
-# Make data base, printed on Sat Jun  4 09:27:19 2022
+# Make data base, printed on Wed Jun  8 14:12:16 2022
 
 # Variables
 
@@ -48,7 +49,7 @@ VSCODE_VERBOSE_LOGGING = true
 # environment
 __CFBundleIdentifier = com.microsoft.VSCode
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /var/folders/ly/gvds2pl55pdfcyhc7xjh6g9m0000gn/T/vscode-ipc-f1316a98-1857-43bb-8f7c-7bb43580006b.sock
+VSCODE_IPC_HOOK_EXTHOST = /var/folders/ly/gvds2pl55pdfcyhc7xjh6g9m0000gn/T/vscode-ipc-bc066f06-7199-4ddd-9ac8-62d8da6e062a.sock
 # environment
 VSCODE_CWD = /
 # environment
@@ -160,7 +161,7 @@ MAKELEVEL := 0
 # environment
 LANG = C
 # environment
-VSCODE_PID = 49070
+VSCODE_PID = 73472
 # makefile (from `makefile', line 17)
 DBGDIR = debug
 # variable set hash-table stats:
@@ -298,6 +299,7 @@ debug/structures.o:
 release: release/build
 #  Phony target (prerequisite of .PHONY).
 #  Implicit rule search has not been done.
+ 
 #  File does not exist.
 #  File has not been updated.
 
@@ -322,7 +324,6 @@ clean:
 	rm -f $(RELEXE) $(RELOBJS) $(DBGEXE) $(DBGOBJS)
 	
 
- 
 debug/build: debug/structures.o debug/game.o debug/main.o
 #  Implicit rule search has not been done.
 #  Modification time never checked.
@@ -350,6 +351,6 @@ debug/game.o:
 # strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
 # strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
 
-# Finished Make data base on Sat Jun  4 09:27:19 2022
+# Finished Make data base on Wed Jun  8 14:12:16 2022
 
  

@@ -191,17 +191,8 @@ static void check_guess(dict_ptr D, char *ref, char *s, int wordsize, req_ptr re
     // checking guesses is O(l*m), but l is rapidly decreasing
     eval = calculate_eval(ref, s, wordsize); // O(2m + 64)   m = wordsize
     calculate_req(s, eval, reqs);            // O(m + 128)
-    if (D->head == NULL){
-        clock_t start = clock();
-        fill_list(D, D->root, reqs);
-        clock_t stop = clock();
-        fill_time += (double)(stop - start) * 1000.0 / CLOCKS_PER_SEC;
-    } else {
-        clock_t start = clock();
-        filter_req(D, reqs);                // O(l * (m + 64)) l = L->len
-        clock_t stop = clock();
-        filter_time += (double)(stop - start) * 1000.0 / CLOCKS_PER_SEC;
-    }
+    if (D->head == NULL) fill_list(D, D->root, reqs);
+    else filter_req(D, reqs);                // O(l * (m + 64)) l = L->len
     fputs(eval, output);
     fputs("\n",output);
     fprintf(output, "%d\n", D->len);
@@ -240,11 +231,8 @@ static void handle_insert(dict_ptr D, int wordsize, req_ptr reqs, FILE *input){
     }
     if (wordsize <= 15) while (fgetc(input) != '\n');
 
-    clock_t start = clock();
     quicksort(list_buffer, list_buffer + i - 1);
     sequential_insert(D, list_buffer, i);
-    clock_t stop = clock();
-    insert_ord_time += (double)(stop - start) * 1000.0 / CLOCKS_PER_SEC;
 
     free(list_buffer);
     free(buff);

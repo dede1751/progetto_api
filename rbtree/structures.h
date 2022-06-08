@@ -44,13 +44,6 @@ typedef struct dict {
 
 typedef dict_t *dict_ptr;
 
-extern double insert_time;
-extern double insert_ord_time;
-extern double search_time;
-extern double fill_time;
-extern double filter_time;
-extern double total_time;
-extern double print_time;
 
 dict_ptr generate_dict();
 

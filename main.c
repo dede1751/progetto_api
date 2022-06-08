@@ -1,12 +1,6 @@
 #include "structures.h"
 #include "game.h"
 
-/*
-    - POSSIBLE OPTIMIZATIONS: 
-  * init list after the first guess
-  * hash table for faster search
-  * depending on wordsize adjust reqs->occ
-*/
 
 double insert_time = 0.0;
 double insert_ord_time = 0.0;
@@ -38,6 +32,7 @@ int main(){
         safe_fgets(buff, wordsize, input);
     }
     if (wordsize <= 14) while (fgetc(input) != '\n'); // dumps leftover
+    free(buff);
 
     i = 1;
     do { // main game loop

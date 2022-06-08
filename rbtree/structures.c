@@ -115,8 +115,6 @@ node_ptr insert(dict_ptr T, char *s){
     node_ptr curr, prev, new;
     int i;
 
-    clock_t start = clock();
-
     curr = T->root;
     prev = T->NIL;
     while(curr != T->NIL){
@@ -140,8 +138,6 @@ node_ptr insert(dict_ptr T, char *s){
 
     insert_fixup(T, new);
 
-    clock_t stop = clock();
-    insert_time += (double)(stop - start) * 1000.0 / CLOCKS_PER_SEC;
     return new;
 }
 
@@ -150,22 +146,14 @@ uint8_t search(dict_ptr D, char* s){
     node_ptr curr;
     int i;
 
-    clock_t start = clock();
-
     curr = D->root;
     while(curr != D->NIL){
         i = strcmp(s, curr->word);
-        if (i == 0) {
-            clock_t stop = clock();
-            search_time += (double)(stop - start) * 1000.0 / CLOCKS_PER_SEC;
-            return 1;
-        }
+        if (i == 0) return 1;
         else if (i > 0) curr = curr->right;
         else curr = curr->left;
     }
 
-    clock_t stop = clock();
-    search_time += (double)(stop - start) * 1000.0 / CLOCKS_PER_SEC;
     return 0;
 }
 
@@ -237,13 +225,11 @@ void sequential_insert(dict_ptr D, node_ptr *buffer, int len){
 
 void print_list(dict_ptr T, FILE *output){
     node_ptr curr;
-    clock_t start = clock();
+
     for (curr = T->head; curr != NULL; curr = curr->next){
         fputs(curr->word, output);
         fputs("\n", output);
     }
-    clock_t stop = clock();
-    print_time += (double)(stop - start) * 1000.0 / CLOCKS_PER_SEC;
 }
 
 void print_tree(dict_ptr D, node_ptr x, FILE *output){

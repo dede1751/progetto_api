@@ -9,7 +9,7 @@ static uint8_t check_req(char *, req_ptr);
 static void filter_req(dict_ptr, req_ptr);
 static void free_req(req_ptr);
 
-static void fill_list(dict_ptr, node_ptr, req_ptr);
+static void create_list(dict_ptr, req_ptr);
 static void check_guess(dict_ptr, char *, char *, int, req_ptr, FILE *);
 static void handle_insert(dict_ptr, int, req_ptr, FILE *);
 
@@ -32,6 +32,7 @@ static uint8_t map_charset(char c){
 
 
 static char *calculate_eval(char *ref, char *s, int wordsize){
+    // optimize?
     char *eval = (char *)calloc(wordsize + 1, sizeof(char));
     uint8_t counts[CHARSET] = {0}; // possible of but gambling for memory
     int i;
@@ -169,21 +170,39 @@ static void free_req(req_ptr reqs){
     free(reqs);
 }
 
-// lazy filling, walks through tree in reverse order
-static void fill_list(dict_ptr D, node_ptr x, req_ptr reqs){
-    if (x != D->NIL){
-        fill_list(D, x->right, reqs);
 
-        if (check_req(x->word, reqs) == 1){
-            x->next = D->head;
-            D->head = x;
-            ++(D->len);
+static void create_list(dict_ptr D, req_ptr reqs){
+    node_ptr *list_buffer = (node_ptr *)malloc(D->items * sizeof(node_ptr));
+    node_ptr curr;
+    int i, j, count = 0;
+
+    // parse table and add all items matching requirements to buffer
+    for (i = 0, j = 0; j < D->items; ++i){
+        curr = D->table[i];
+        while (curr != NULL){
+            if (check_req(curr->word, reqs) == 1){
+                list_buffer[count] = curr;
+                ++count;
+            }
+            curr = curr->chain;
+            ++j;
         }
-
-        fill_list(D, x->left, reqs);
     }
-}
 
+    // sort buffer
+    quicksort(list_buffer, list_buffer + count - 1);
+    
+    // link buffer elements into list
+    curr = list_buffer[0];
+    for (i = 1; i < count; ++i){
+        curr->next = list_buffer[i];
+        curr = curr->next;
+    }
+
+    D->head = list_buffer[0];
+    D->len = count;
+    free(list_buffer);
+}
 
 static void check_guess(dict_ptr D, char *ref, char *s, int wordsize, req_ptr reqs, FILE *output){
     char *eval;
@@ -193,7 +212,7 @@ static void check_guess(dict_ptr D, char *ref, char *s, int wordsize, req_ptr re
     calculate_req(s, eval, reqs);            // O(m + 128)
     if (D->head == NULL){
         clock_t start = clock();
-        fill_list(D, D->root, reqs);
+        create_list(D, reqs);
         clock_t stop = clock();
         fill_time += (double)(stop - start) * 1000.0 / CLOCKS_PER_SEC;
     } else {
@@ -209,7 +228,7 @@ static void check_guess(dict_ptr D, char *ref, char *s, int wordsize, req_ptr re
 }
 
 /*
-Inserts all new words into the tree. Words that fall within the requirements are
+Inserts all new words into the table. Words that fall within the requirements are
 buffered in a dynamically reallocated array which gets sorted, and are then
 inserted sequentially into the list.
 */
@@ -269,8 +288,8 @@ uint8_t new_game(dict_ptr D, int wordsize, FILE *input, FILE *output){
         if(buff[0] == '+'){
             if (buff[1] == 's'){ // +stampa_filtrate
                 if (wordsize <= 16) while (fgetc(input) != '\n');
-                if (D->head == NULL) print_tree(D, D->root, output);
-                else print_list(D, output);
+                if (D->head == NULL) create_list(D, requirements);
+                print_list(D, output);
             } else if (buff[1] == 'i'){ // +inserisci_inizio
                 if (wordsize <= 17) while (fgetc(input) != '\n');
                 handle_insert(D, wordsize, requirements, input);

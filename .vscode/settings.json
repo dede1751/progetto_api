@@ -27,7 +27,8 @@
         "string_view": "c",
         "unordered_map": "c",
         "vector": "c",
-        "iterator": "c"
+        "iterator": "c",
+        "time.h": "c"
     },
     "C_Cpp.errorSquiggles": "Disabled",
 }
