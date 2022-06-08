@@ -3,3 +3,6 @@
 /release
 /test
 dum_e/dump.txt
+.vscode/configurationCache.log
+.gitignore
+.vscode/targets.log

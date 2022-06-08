@@ -6,7 +6,8 @@
 #include <stdint.h>
 #include <string.h>
 #include <time.h>
-#define BASE_SIZE 65536
+//#define BASE_SIZE 65536
+#define BASE_SIZE 2097152
 #define LIMIT_RATIO 0.5867f
 
 /*
