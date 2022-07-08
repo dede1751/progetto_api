@@ -311,7 +311,7 @@ uint8_t new_game(dict_ptr D, int wordsize, FILE *input, FILE *output){
         safe_fgets(buff, 17, input);
         if (buff[0] == 'i'){
             handle_insert(D, wordsize, NULL, input); // only add words to tree
-            safe_fgets(buff, 18, input);
+            safe_fgets(buff, 17, input);
         }
         free(buff);
     } return 1;

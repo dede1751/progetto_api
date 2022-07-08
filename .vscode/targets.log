@@ -1,170 +1,241 @@
 /usr/bin/make all --print-data-base --no-builtin-variables --no-builtin-rules --question
-# GNU Make 3.81
-# Copyright (C) 2006  Free Software Foundation, Inc.
-# This is free software; see the source for copying conditions.
-# There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A
-# PARTICULAR PURPOSE.
+# GNU Make 4.3
+# Built for x86_64-pc-linux-gnu
+# Copyright (C) 1988-2020 Free Software Foundation, Inc.
+# License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+# This is free software: you are free to change and redistribute it.
+# There is NO WARRANTY, to the extent permitted by law.
 
-# This program built for i386-apple-darwin11.3.0
-
-# Make data base, printed on Wed Jun  8 16:26:15 2022
+# Make data base, printed on Fri Jul  8 14:52:21 2022
 
 # Variables
 
-# automatic
-<D = $(patsubst %/,%,$(dir $<))
-# makefile (from `makefile', line 26)
-RELEXE = $(RELDIR)/$(EXE)
-# automatic
-?F = $(notdir $?)
 # environment
-VSCODE_LOG_NATIVE = false
-# automatic
-?D = $(patsubst %/,%,$(dir $?))
+GDK_BACKEND = x11
+# environment
+LC_ALL = C
+# environment
+NO_AT_BRIDGE = 1
+# environment
+STARSHIP_SESSION_KEY = 2073215025238632
+# environment
+VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-b45e793b-63a4-47a3-b281-113f37c0889b.sock
+# environment
+LC_NAME = it_IT.UTF-8
+# environment
+LC_NUMERIC = it_IT.UTF-8
+# environment
+VSCODE_CWD = /home/andrea
+# environment
+WINDOWID = 58720258
+# makefile (from 'makefile', line 17)
+DBGDIR = debug
+# environment
+LC_ADDRESS = it_IT.UTF-8
+# default
+MAKE_COMMAND := /usr/bin/make
+# makefile (from 'makefile', line 28)
+RELCFLAGS = -O3 -DNDEBUG
+# makefile (from 'makefile', line 19)
+DBGOBJS = $(addprefix $(DBGDIR)/, $(OBJS))
 # automatic
 @D = $(patsubst %/,%,$(dir $@))
-# makefile (from `makefile', line 12)
-EXE = build
-# automatic
-@F = $(notdir $@)
-# makefile
-CURDIR := /Users/andreasgobbi/Documents/uni_works/progetto_api
-# makefile
-SHELL = /bin/sh
-# environment
-VSCODE_NLS_CONFIG = {"locale":"en-gb","availableLanguages":{},"_languagePackSupport":true}
-# environment
-_ = /usr/bin/make
-# makefile (from `makefile', line 5)
-CFLAGS = -Wall -Werror -Wextra
-# makefile (from `makefile', line 25)
-RELDIR = release
-# makefile (from `makefile', line 1)
-MAKEFILE_LIST :=  makefile
-# makefile (from `makefile', line 20)
-DBGCFLAGS = -g3 -DDEBUG
-# environment
-VSCODE_VERBOSE_LOGGING = true
-# environment
-__CFBundleIdentifier = com.microsoft.VSCode
-# environment
-VSCODE_IPC_HOOK_EXTHOST = /var/folders/ly/gvds2pl55pdfcyhc7xjh6g9m0000gn/T/vscode-ipc-def25671-1fd5-45f7-9a68-c699c5e6f112.sock
-# environment
-VSCODE_CWD = /
-# environment
-PATH = /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin
-# makefile (from `makefile', line 28)
-RELCFLAGS = -O3 -DNDEBUG
-# environment
-VSCODE_LOG_STACK = false
-# environment
-ELECTRON_RUN_AS_NODE = 1
-# default
-.FEATURES := target-specific order-only second-expansion else-if archives jobserver check-symlink
-# environment
-SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.RMKOtSTfkv/Listeners
-# automatic
-%F = $(notdir $%)
-# environment
-DISPLAY = /private/tmp/com.apple.launchd.TrNCDNZ84u/org.macosforge.xquartz:0
-# environment
-VSCODE_PIPE_LOGGING = true
-# makefile (from `makefile', line 11)
-OBJS = $(SRCS:.c=.o)
-# makefile (from `makefile', line 18)
-DBGEXE = $(DBGDIR)/$(EXE)
-# environment
-PWD = /Users/andreasgobbi/Documents/uni_works/progetto_api
-# environment
-ORIGINAL_XDG_CURRENT_DESKTOP = undefined
-# environment
-VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
-# environment
-HOME = /Users/andreasgobbi
-# makefile (from `makefile', line 19)
-DBGOBJS = $(addprefix $(DBGDIR)/, $(OBJS))
-# default
-MAKEFILEPATH = $(shell /usr/bin/xcode-select -print-path 2>/dev/null || echo /Developer)/Makefiles
-# environment
-VSCODE_CODE_CACHE_PATH = /Users/andreasgobbi/Library/Application Support/Code/CachedData/c3511e6c69bb39013c4a4b7b9566ec1ca73fc4d5
-# environment
-LOGNAME = andreasgobbi
-# environment
-APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
-# makefile (from `makefile', line 27)
-RELOBJS = $(addprefix $(RELDIR)/, $(OBJS))
 # environment
 VSCODE_HANDLES_UNCAUGHT_ERRORS = true
-# automatic
-^D = $(patsubst %/,%,$(dir $^))
-# environment
-XPC_FLAGS = 0x0
-# default
-MAKE = $(MAKE_COMMAND)
-# default
-MAKECMDGOALS := all
-# makefile (from `makefile', line 10)
-SRCS = structures.c game.c main.c
-# environment
-SHLVL = 1
-# makefile (from `makefile', line 4)
-CC = clang
-# default
-MAKE_VERSION := 3.81
-# environment
-USER = andreasgobbi
-# makefile
-.DEFAULT_GOAL := all
-# automatic
-%D = $(patsubst %/,%,$(dir $%))
-# default
-MAKE_COMMAND := /Library/Developer/CommandLineTools/usr/bin/make
 # default
 .VARIABLES := 
 # environment
-TMPDIR = /var/folders/ly/gvds2pl55pdfcyhc7xjh6g9m0000gn/T/
+PWD = /home/andrea/Documents/progetto_api
 # automatic
-*F = $(notdir $*)
+%D = $(patsubst %/,%,$(dir $%))
 # environment
-VSCODE_IPC_HOOK = /Users/andreasgobbi/Library/Application Support/Code/1.67.2-main.sock
-# makefile
-MAKEFLAGS = Rrqp
+MAIL = /var/spool/mail/andrea
 # environment
-MFLAGS = -Rrqp
+XDG_DATA_DIRS = /usr/local/share:/usr/share:/var/lib/snapd/desktop
+# makefile (from 'makefile', line 18)
+DBGEXE = $(DBGDIR)/$(EXE)
 # automatic
-*D = $(patsubst %/,%,$(dir $*))
+^D = $(patsubst %/,%,$(dir $^))
 # environment
-XPC_SERVICE_NAME = application.com.microsoft.VSCode.19234168.19234174
+VSCODE_LOG_STACK = false
 # automatic
-+D = $(patsubst %/,%,$(dir $+))
-# automatic
-+F = $(notdir $+)
+%F = $(notdir $%)
 # environment
-__CF_USER_TEXT_ENCODING = 0x1F5:0x0:0x0
+ALACRITTY_SOCKET = /run/user/1000/Alacritty-:0-123824.sock
 # environment
-COMMAND_MODE = unix2003
-# default
-MAKEFILES := 
-# automatic
-<F = $(notdir $<)
+VSCODE_CODE_CACHE_PATH = /home/andrea/.config/Code/CachedData/30d9c6cd9483b2cc586687151bcbcd635f373630
 # environment
-LC_ALL = C
-# automatic
-^F = $(notdir $^)
-# default
-SUFFIXES := 
-# default
-.INCLUDE_DIRS = /usr/local/include
-# environment
-MAKELEVEL := 0
+XDG_SESSION_PATH = /org/freedesktop/DisplayManager/Session5
 # environment
 LANG = C
 # environment
-VSCODE_PID = 75868
-# makefile (from `makefile', line 17)
-DBGDIR = debug
+XAUTHORITY = /home/andrea/.Xauthority
+# default
+.LOADED := 
+# default
+.INCLUDE_DIRS = /usr/include /usr/local/include /usr/include
+# makefile
+MAKEFLAGS = pqrR
+# makefile
+CURDIR := /home/andrea/Documents/progetto_api
+# environment
+VSCODE_PIPE_LOGGING = true
+# environment
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
+# makefile (from 'makefile', line 10)
+SRCS = structures.c game.c main.c
+# automatic
+*D = $(patsubst %/,%,$(dir $*))
+# environment
+MFLAGS = -pqrR
+# default
+.SHELLFLAGS := -c
+# automatic
++D = $(patsubst %/,%,$(dir $+))
+# makefile (from 'makefile', line 20)
+DBGCFLAGS = -g3 -DDEBUG
+# environment
+XDG_SESSION_DESKTOP = 
+# makefile (from 'makefile', line 1)
+MAKEFILE_LIST := makefile
+# automatic
+@F = $(notdir $@)
+# makefile (from 'makefile', line 27)
+RELOBJS = $(addprefix $(RELDIR)/, $(OBJS))
+# environment
+VSCODE_VERBOSE_LOGGING = true
+# environment
+VSCODE_PID = 124270
+# environment
+XDG_SESSION_TYPE = x11
+# automatic
+?D = $(patsubst %/,%,$(dir $?))
+# environment
+MANPAGER = sh -c 'col -bx | bat -l man -p'
+# automatic
+*F = $(notdir $*)
+# environment
+CHROME_DESKTOP = code-url-handler.desktop
+# environment
+DBUS_SESSION_BUS_ADDRESS = unix:path=/run/user/1000/bus
+# automatic
+<D = $(patsubst %/,%,$(dir $<))
+# environment
+VSCODE_NLS_CONFIG = {"locale":"en-us","availableLanguages":{},"_languagePackSupport":true}
+# default
+MAKE_HOST := x86_64-pc-linux-gnu
+# makefile (from 'makefile', line 11)
+OBJS = $(SRCS:.c=.o)
+# makefile
+SHELL = /bin/sh
+# default
+MAKECMDGOALS := all
+# environment
+SHLVL = 3
+# environment
+MAKELEVEL := 0
+# default
+MAKE = $(MAKE_COMMAND)
+# environment
+PATH = /home/andrea/.local/bin:/home/andrea/Applications:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/var/lib/snapd/snap/bin
+# default
+MAKEFILES := 
+# environment
+LC_MONETARY = it_IT.UTF-8
+# environment
+MOTD_SHOWN = pam
+# automatic
+^F = $(notdir $^)
+# environment
+LC_TIME = it_IT.UTF-8
+# makefile (from 'makefile', line 25)
+RELDIR = release
+# environment
+VSCODE_LOG_NATIVE = false
+# makefile (from 'makefile', line 26)
+RELEXE = $(RELDIR)/$(EXE)
+# environment
+LC_TELEPHONE = it_IT.UTF-8
+# automatic
+?F = $(notdir $?)
+# environment
+XDG_SEAT = seat0
+# environment
+XDG_CURRENT_DESKTOP = 
+# environment
+ALACRITTY_LOG = /tmp/Alacritty-123824.log
+# automatic
++F = $(notdir $+)
+# environment
+XDG_SEAT_PATH = /org/freedesktop/DisplayManager/Seat0
+# environment
+DESKTOP_SESSION = xmonad
+# environment
+ORIGINAL_XDG_CURRENT_DESKTOP = 
+# 'override' directive
+GNUMAKEFLAGS := 
+# environment
+LOGNAME = andrea
+# makefile (from 'makefile', line 12)
+EXE = build
+# environment
+XDG_VTNR = 1
+# makefile
+.DEFAULT_GOAL := all
+# environment
+DISPLAY = :0
+# environment
+GTK_MODULES = canberra-gtk-module
+# environment
+USER = andrea
+# default
+MAKE_VERSION := 4.3
+# environment
+LC_MEASUREMENT = it_IT.UTF-8
+# environment
+STARSHIP_SHELL = fish
+# environment
+_ = /usr/bin/make
+# environment
+LC_PAPER = it_IT.UTF-8
+# environment
+XDG_RUNTIME_DIR = /run/user/1000
+# makefile (from 'makefile', line 5)
+CFLAGS = -Wall -Werror -Wextra
+# environment
+COLORTERM = truecolor
+# environment
+XDG_SESSION_CLASS = user
+# environment
+VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
+# environment
+HOME = /home/andrea
+# environment
+ELECTRON_RUN_AS_NODE = 1
+# environment
+VSCODE_IPC_HOOK = /run/user/1000/vscode-4ee681d6-1.68.1-main.sock
+# environment
+TERM = xterm-256color
+# environment
+XDG_SESSION_ID = 7
+# default
+.RECIPEPREFIX := 
+# automatic
+<F = $(notdir $<)
+# default
+SUFFIXES := 
+# environment
+VSCODE_CLI = 1
+# environment
+ELECTRON_NO_ATTACH_CONSOLE = 1
+# default
+.FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell nocomment grouped-target extra-prereqs archives jobserver output-sync check-symlink guile load
+# makefile (from 'makefile', line 4)
+CC = gcc
+# environment
+LC_IDENTIFICATION = it_IT.UTF-8
 # variable set hash-table stats:
-# Load=76/1024=7%, Rehash=0, Collisions=10/126=8%
+# Load=112/1024=11%, Rehash=0, Collisions=9/169=5%
 
 # Pattern-specific Variable Values
 
@@ -172,36 +243,25 @@ DBGDIR = debug
 
 # Directories
 
-# . (device 16777226, inode 19158221): 17 files, no impossibilities.
+# . (device 66309, inode 395455): 17 files, no impossibilities.
 
 # 17 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
 debug/%.o: %.c
-#  commands to execute (from `makefile', line 44):
+#  recipe to execute (from 'makefile', line 44):
 	$(CC) -c $(CFLAGS) $(DBGCFLAGS) -o $@ $<
-	
 
 release/%.o: %.c
-#  commands to execute (from `makefile', line 55):
+#  recipe to execute (from 'makefile', line 55):
 	$(CC) -c $(CFLAGS) $(RELCFLAGS) -o $@ $<
-	
 
 # 2 implicit rules, 0 (0.0%) terminal.
-
 # Files
 
-release/build: release/structures.o release/game.o release/main.o
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
-#  commands to execute (from `makefile', line 52):
-	$(CC) $(CFLAGS) $(RELCFLAGS) -o $(RELEXE) $^
-	
-
 # Not a target:
-debug/main.o:
+release/structures.o:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
@@ -212,55 +272,39 @@ release/game.o:
 #  Modification time never checked.
 #  File has not been updated.
 
-all: prep release debug
+debug: debug/build
 #  Phony target (prerequisite of .PHONY).
-#  Command-line target.
 #  Implicit rule search has not been done.
 #  File does not exist.
-#  File has been updated.
-#  Needs to be updated (-q is set).
-# variable set hash-table stats:
-# Load=0/32=0%, Rehash=0, Collisions=0/4=0%
-
-.PHONY: all clean debug prep release remake
-#  Implicit rule search has not been done.
-#  Modification time never checked.
 #  File has not been updated.
+
+clean:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'makefile', line 66):
+	rm -f $(RELEXE) $(RELOBJS) $(DBGEXE) $(DBGOBJS)
 
 # Not a target:
-release/main.o:
+debug/game.o:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
 
-prep:
-#  Phony target (prerequisite of .PHONY).
+release/build: release/structures.o release/game.o release/main.o
 #  Implicit rule search has not been done.
-#  Implicit/static pattern stem: `'
-#  File does not exist.
-#  File has been updated.
-#  Needs to be updated (-q is set).
-# automatic
-# @ := prep
-# automatic
-# % := 
-# automatic
-# * := 
-# automatic
-# + := 
-# automatic
-# | := 
-# automatic
-# < := 
-# automatic
-# ^ := 
-# automatic
-# ? := 
-# variable set hash-table stats:
-# Load=8/32=25%, Rehash=0, Collisions=1/12=8%
-#  commands to execute (from `makefile', line 61):
-	@mkdir -p $(DBGDIR) $(RELDIR)
-	
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'makefile', line 52):
+	$(CC) $(CFLAGS) $(RELCFLAGS) -o $(RELEXE) $^
+
+debug/build: debug/structures.o debug/game.o debug/main.o
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'makefile', line 41):
+	$(CC) $(CFLAGS) $(DBGCFLAGS) -o $(DBGEXE) $^
 
 remake: clean all
 #  Phony target (prerequisite of .PHONY).
@@ -269,25 +313,61 @@ remake: clean all
 #  File has not been updated.
 
 # Not a target:
-.SUFFIXES:
+.DEFAULT:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
 
-debug: debug/build
+all: prep release debug
 #  Phony target (prerequisite of .PHONY).
+#  Command line target.
 #  Implicit rule search has not been done.
 #  File does not exist.
+#  File has been updated.
+#  Needs to be updated (-q is set).
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/5=0%
+
+prep:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  Implicit/static pattern stem: ''
+#  File does not exist.
+#  File has been updated.
+#  Needs to be updated (-q is set).
+# automatic
+# @ := prep
+# automatic
+# * := 
+# automatic
+# < := 
+# automatic
+# + := 
+# automatic
+# % := 
+# automatic
+# ^ := 
+# automatic
+# ? := 
+# automatic
+# | := 
+# variable set hash-table stats:
+# Load=8/32=25%, Rehash=0, Collisions=1/13=8%
+#  recipe to execute (from 'makefile', line 61):
+	@mkdir -p $(DBGDIR) $(RELDIR)
+
+# Not a target:
+debug/main.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
 #  File has not been updated.
 
 # Not a target:
 makefile:
 #  Implicit rule search has been done.
-#  Last modified 2022-06-08 14:24:07
+#  Last modified 2022-07-08 14:43:43.174948584
 #  File has been updated.
 #  Successfully updated.
-# variable set hash-table stats:
-# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
 
 # Not a target:
 debug/structures.o:
@@ -302,54 +382,36 @@ release: release/build
 #  File has not been updated.
 
 # Not a target:
-.DEFAULT:
+.SUFFIXES:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+.PHONY: all clean debug prep release remake
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
 
 # Not a target:
-release/structures.o:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
-
-clean:
-#  Phony target (prerequisite of .PHONY).
-#  Implicit rule search has not been done.
-#  File does not exist.
-#  File has not been updated.
-#  commands to execute (from `makefile', line 66):
-	rm -f $(RELEXE) $(RELOBJS) $(DBGEXE) $(DBGOBJS)
-	
-
- 
-debug/build: debug/structures.o debug/game.o debug/main.o
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
-#  commands to execute (from `makefile', line 41):
-	$(CC) $(CFLAGS) $(DBGCFLAGS) -o $(DBGEXE) $^
-	
-
-# Not a target:
-debug/game.o:
+release/main.o:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
 
 # files hash-table stats:
-# Load=18/1024=2%, Rehash=0, Collisions=2/51=4%
+# Load=18/1024=2%, Rehash=0, Collisions=0/56=0%
 # VPATH Search Paths
 
-# No `vpath' search paths.
+# No 'vpath' search paths.
 
-# No general (`VPATH' variable) search path.
+# No general ('VPATH' variable) search path.
 
-# # of strings in strcache: 1
-# # of strcache buffers: 1
-# strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
-# strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
+# strcache buffers: 1 (0) / strings = 37 / storage = 364 B / avg = 9 B
+# current buf: size = 8162 B / used = 364 B / count = 37 / avg = 9 B
 
-# Finished Make data base on Wed Jun  8 16:26:15 2022
+# strcache performance: lookups = 68 / hit rate = 45%
+# hash-table stats:
+# Load=37/8192=0%, Rehash=0, Collisions=0/68=0%
+# Finished Make data base on Fri Jul  8 14:52:21 2022
 
  

@@ -3,10 +3,15 @@
     "makefile.buildBeforeLaunch": true,
     "makefile.launchConfigurations": [
         {
-            "cwd": "/Users/andreasgobbi/Documents/uni_works/progetto_api/debug",
-            "binaryPath": "/Users/andreasgobbi/Documents/uni_works/progetto_api/debug/build",
+            "cwd": "/home/andrea/Documents/uni_works/progetto_api/debug",
+            "binaryPath": "/home/andrea/Documents/progetto_api/debug/build",
             "binaryArgs": [],
-            "stopAtEntry": true,
+            "stopAtEntry": true
+        },
+        {
+            "cwd": "/home/andrea/Documents/progetto_api/debug",
+            "binaryPath": "/home/andrea/Documents/progetto_api/debug/build",
+            "binaryArgs": []
         }
     ],
     "files.associations": {

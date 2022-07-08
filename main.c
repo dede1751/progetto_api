@@ -6,7 +6,7 @@ int main(){
     dict_ptr word_dict = generate_dict();
     char *buff;
     int wordsize, restart;
-    FILE *input = fopen("/home/andrea/Documents/progetto_api/dum_e/test3.txt", "r");
+    FILE *input = fopen("/home/andrea/Documents/progetto_api/dum_e/upto18.txt", "r");
     FILE *output = fopen("/home/andrea/Documents/progetto_api/dum_e/dump.txt", "w");
 
     // save initial wordlist on the tree
