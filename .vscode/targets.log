@@ -6,7 +6,7 @@
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Fri Jul  8 14:52:21 2022
+# Make data base, printed on Mon Jul 11 09:03:39 2022
 
 # Variables
 
@@ -17,21 +17,19 @@ LC_ALL = C
 # environment
 NO_AT_BRIDGE = 1
 # environment
-STARSHIP_SESSION_KEY = 2073215025238632
+I3SOCK = /run/user/1000/i3/ipc-socket.644
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-b45e793b-63a4-47a3-b281-113f37c0889b.sock
+LC_NAME = en_US.UTF-8
 # environment
-LC_NAME = it_IT.UTF-8
-# environment
-LC_NUMERIC = it_IT.UTF-8
+LC_NUMERIC = en_US.UTF-8
 # environment
 VSCODE_CWD = /home/andrea
 # environment
-WINDOWID = 58720258
+WINDOWID = 39845890
 # makefile (from 'makefile', line 17)
 DBGDIR = debug
 # environment
-LC_ADDRESS = it_IT.UTF-8
+LC_ADDRESS = en_US.UTF-8
 # default
 MAKE_COMMAND := /usr/bin/make
 # makefile (from 'makefile', line 28)
@@ -56,16 +54,14 @@ XDG_DATA_DIRS = /usr/local/share:/usr/share:/var/lib/snapd/desktop
 DBGEXE = $(DBGDIR)/$(EXE)
 # automatic
 ^D = $(patsubst %/,%,$(dir $^))
-# environment
-VSCODE_LOG_STACK = false
 # automatic
 %F = $(notdir $%)
 # environment
-ALACRITTY_SOCKET = /run/user/1000/Alacritty-:0-123824.sock
+ALACRITTY_SOCKET = /run/user/1000/Alacritty-:0-847.sock
 # environment
-VSCODE_CODE_CACHE_PATH = /home/andrea/.config/Code/CachedData/30d9c6cd9483b2cc586687151bcbcd635f373630
+VSCODE_CODE_CACHE_PATH = /home/andrea/.config/Code/CachedData/92d25e35d9bf1a6b16f7d0758f25d48ace11e5b9
 # environment
-XDG_SESSION_PATH = /org/freedesktop/DisplayManager/Session5
+XDG_SESSION_PATH = /org/freedesktop/DisplayManager/Session0
 # environment
 LANG = C
 # environment
@@ -78,8 +74,6 @@ XAUTHORITY = /home/andrea/.Xauthority
 MAKEFLAGS = pqrR
 # makefile
 CURDIR := /home/andrea/Documents/progetto_api
-# environment
-VSCODE_PIPE_LOGGING = true
 # environment
 APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
 # makefile (from 'makefile', line 10)
@@ -95,7 +89,7 @@ MFLAGS = -pqrR
 # makefile (from 'makefile', line 20)
 DBGCFLAGS = -g3 -DDEBUG
 # environment
-XDG_SESSION_DESKTOP = 
+XDG_SESSION_DESKTOP = i3
 # makefile (from 'makefile', line 1)
 MAKEFILE_LIST := makefile
 # automatic
@@ -103,17 +97,15 @@ MAKEFILE_LIST := makefile
 # makefile (from 'makefile', line 27)
 RELOBJS = $(addprefix $(RELDIR)/, $(OBJS))
 # environment
-VSCODE_VERBOSE_LOGGING = true
-# environment
-VSCODE_PID = 124270
+VSCODE_PID = 1291
 # environment
 XDG_SESSION_TYPE = x11
 # automatic
 ?D = $(patsubst %/,%,$(dir $?))
-# environment
-MANPAGER = sh -c 'col -bx | bat -l man -p'
 # automatic
 *F = $(notdir $*)
+# environment
+QT_QPA_PLATFORMTHEME = qt5ct
 # environment
 CHROME_DESKTOP = code-url-handler.desktop
 # environment
@@ -131,57 +123,61 @@ SHELL = /bin/sh
 # default
 MAKECMDGOALS := all
 # environment
-SHLVL = 3
+SHLVL = 2
 # environment
 MAKELEVEL := 0
 # default
 MAKE = $(MAKE_COMMAND)
 # environment
-PATH = /home/andrea/.local/bin:/home/andrea/Applications:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/var/lib/snapd/snap/bin
+PATH = /home/andrea/.local/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/var/lib/snapd/snap/bin
 # default
 MAKEFILES := 
 # environment
-LC_MONETARY = it_IT.UTF-8
+LC_MONETARY = en_US.UTF-8
 # environment
 MOTD_SHOWN = pam
 # automatic
 ^F = $(notdir $^)
 # environment
-LC_TIME = it_IT.UTF-8
+LC_TIME = en_US.UTF-8
 # makefile (from 'makefile', line 25)
 RELDIR = release
-# environment
-VSCODE_LOG_NATIVE = false
 # makefile (from 'makefile', line 26)
 RELEXE = $(RELDIR)/$(EXE)
 # environment
-LC_TELEPHONE = it_IT.UTF-8
+LC_TELEPHONE = en_US.UTF-8
 # automatic
 ?F = $(notdir $?)
 # environment
 XDG_SEAT = seat0
 # environment
-XDG_CURRENT_DESKTOP = 
+XDG_CURRENT_DESKTOP = i3
 # environment
-ALACRITTY_LOG = /tmp/Alacritty-123824.log
+ALACRITTY_LOG = /tmp/Alacritty-847.log
+# environment
+LS_COLORS = 
 # automatic
 +F = $(notdir $+)
 # environment
 XDG_SEAT_PATH = /org/freedesktop/DisplayManager/Seat0
 # environment
-DESKTOP_SESSION = xmonad
+DESKTOP_SESSION = i3
 # environment
-ORIGINAL_XDG_CURRENT_DESKTOP = 
+ORIGINAL_XDG_CURRENT_DESKTOP = i3
 # 'override' directive
 GNUMAKEFLAGS := 
+# environment
+BROWSER = /usr/bin/firefox
 # environment
 LOGNAME = andrea
 # makefile (from 'makefile', line 12)
 EXE = build
 # environment
-XDG_VTNR = 1
+XDG_VTNR = 7
 # makefile
 .DEFAULT_GOAL := all
+# environment
+EDITOR = /usr/bin/code
 # environment
 DISPLAY = :0
 # environment
@@ -191,13 +187,13 @@ USER = andrea
 # default
 MAKE_VERSION := 4.3
 # environment
-LC_MEASUREMENT = it_IT.UTF-8
+LC_MEASUREMENT = en_US.UTF-8
 # environment
-STARSHIP_SHELL = fish
+DEBUGINFOD_URLS = https://debuginfod.archlinux.org 
 # environment
 _ = /usr/bin/make
 # environment
-LC_PAPER = it_IT.UTF-8
+LC_PAPER = en_US.UTF-8
 # environment
 XDG_RUNTIME_DIR = /run/user/1000
 # makefile (from 'makefile', line 5)
@@ -209,15 +205,17 @@ XDG_SESSION_CLASS = user
 # environment
 VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
 # environment
+GTK2_RC_FILES = /home/andrea/.gtkrc-2.0
+# environment
 HOME = /home/andrea
 # environment
 ELECTRON_RUN_AS_NODE = 1
 # environment
-VSCODE_IPC_HOOK = /run/user/1000/vscode-4ee681d6-1.68.1-main.sock
+VSCODE_IPC_HOOK = /run/user/1000/vscode-4ee681d6-1.69.0-main.sock
 # environment
-TERM = xterm-256color
+TERM = alacritty
 # environment
-XDG_SESSION_ID = 7
+XDG_SESSION_ID = 2
 # default
 .RECIPEPREFIX := 
 # automatic
@@ -228,14 +226,18 @@ SUFFIXES :=
 VSCODE_CLI = 1
 # environment
 ELECTRON_NO_ATTACH_CONSOLE = 1
+# environment
+XDG_GREETER_DATA_DIR = /var/lib/lightdm-data/andrea
 # default
 .FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell nocomment grouped-target extra-prereqs archives jobserver output-sync check-symlink guile load
 # makefile (from 'makefile', line 4)
 CC = gcc
 # environment
-LC_IDENTIFICATION = it_IT.UTF-8
+GDMSESSION = i3
+# environment
+LC_IDENTIFICATION = en_US.UTF-8
 # variable set hash-table stats:
-# Load=112/1024=11%, Rehash=0, Collisions=9/169=5%
+# Load=113/1024=11%, Rehash=0, Collisions=9/170=5%
 
 # Pattern-specific Variable Values
 
@@ -243,9 +245,9 @@ LC_IDENTIFICATION = it_IT.UTF-8
 
 # Directories
 
-# . (device 66309, inode 395455): 17 files, no impossibilities.
+# . (device 66309, inode 786735): 16 files, no impossibilities.
 
-# 17 files, no impossibilities in 1 directories.
+# 16 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -277,6 +279,7 @@ debug: debug/build
 #  Implicit rule search has not been done.
 #  File does not exist.
 #  File has not been updated.
+ 
 
 clean:
 #  Phony target (prerequisite of .PHONY).
@@ -365,7 +368,7 @@ debug/main.o:
 # Not a target:
 makefile:
 #  Implicit rule search has been done.
-#  Last modified 2022-07-08 14:43:43.174948584
+#  Last modified 2022-07-08 21:18:29.256731957
 #  File has been updated.
 #  Successfully updated.
 
@@ -406,12 +409,12 @@ release/main.o:
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 37 / storage = 364 B / avg = 9 B
-# current buf: size = 8162 B / used = 364 B / count = 37 / avg = 9 B
+# strcache buffers: 1 (0) / strings = 36 / storage = 353 B / avg = 9 B
+# current buf: size = 8162 B / used = 353 B / count = 36 / avg = 9 B
 
-# strcache performance: lookups = 68 / hit rate = 45%
+# strcache performance: lookups = 67 / hit rate = 46%
 # hash-table stats:
-# Load=37/8192=0%, Rehash=0, Collisions=0/68=0%
-# Finished Make data base on Fri Jul  8 14:52:21 2022
+# Load=36/8192=0%, Rehash=0, Collisions=0/67=0%
+# Finished Make data base on Mon Jul 11 09:03:39 2022
 
  
