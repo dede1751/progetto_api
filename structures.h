@@ -5,79 +5,37 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-#include <time.h>
-//#define BASE_SIZE 65536
-#define BASE_SIZE 2097152
-#define LIMIT_RATIO 0.5867f
+
+#define CHARSET 64
 
 /*
- *      STRUCTURES:
- *  - Hash Table:
- *      * permanent structure, always contains the full dictionary
- *      * lookup and insertion are ideally in constant time
- *      * table is rehashed with double the size when exceeding the limit load
- *        of 2 - sqrt(2)
- *  - List (single-link):
- *      * linked at game runtime, rapidly reduces in size due to constraints
- *        introduced by each guess
- *      * only used for keeping track of which words are still plausible
- *      * lookup and insertion are linear
- *      * length is kept track of within the structure to avoid having to count
- * 
- *  - the structures are built on top of the same nodes. The list is traversed
- *    starting from D->head and accessing the next fields, the tree from D->table
- *    through hashing.
+ *      TRIE:
+ *  - A prune bit is used for keeping track of the uneligible "branches" of the
+ *    trie: if our eval is "/+///" with the second letter a, we can prune all
+ *    nodes on the second level of the trie except for the 'a' nodes, and do
+ *    likewise for the letters we exclude with '/' in the other positions.
+ *  - When sequentially processing guesses, we can prune based simply on the
+ *    eval of each guess.
+ *  - When we encounter an insertion command 
  */
 
 typedef struct n {
-    char *word;
-    struct n *chain;
-    struct n *next;
+    struct n **nodes;
+    uint8_t prune;
 } node_t;
+
 typedef node_t *node_ptr;
 
-typedef struct d {
-    node_ptr *table;
-    int size;
-    int items;
-    int collisions;
 
-    node_ptr head;
-    int len;
-} dict_t;
-typedef dict_t *dict_ptr;
+/* Maps characters on 0-63 interval according to ASCII order */
+uint8_t map_charset(char);
 
+node_ptr generate_node();
+void insert(node_ptr, int, char *);
+uint8_t search(node_ptr, int, char *);
 
-dict_ptr generate_dict();
+int prune_trie(node_ptr, char *, char *);
 
-/*
- *      HASH TABLE OPERATIONS ---- O(1 + load):
- *  - hashing is done with murmur OAAT
- *  - search based on strcmp
- */
-node_ptr insert(dict_ptr, char*);
-uint8_t search(dict_ptr, char*);
-
-/*
- *      LINKED LIST OPERATIONS ---- O(n):
- *  - list is single linked and is embedded within the table nodes
- *     (double link unnecessary because deletion is done sequentially over
- *      the whole list)
- *  - out of order insertions are first buffered, ordered and then done 
- *    sequentially
- */
-void quicksort(node_ptr *, node_ptr *);
-void sequential_insert(dict_ptr, node_ptr *, int);
-void print_list(dict_ptr, FILE *);
-    
-
-/*
- *      GARBAGE COLLECTION:
- *  - reset_list empties the list (head = NULL, len = 0)
- *  - free_dict deallocates the entire table
- *    (program assumes list has already been emptied)
- */
-void reset_list(dict_ptr);
-void free_dict(dict_ptr);
+void print_trie(node_ptr, int);
 
 #endif

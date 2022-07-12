@@ -1,181 +1,190 @@
 #include "structures.h"
 
-static uint32_t hash(char *, uint32_t);
+static char unmap_charset(int);
 
-static void swap(node_ptr *, node_ptr *);
-static node_ptr *partition(node_ptr *, node_ptr *);
-
-static void empty_blocks(node_ptr);
+static int rec_prune(node_ptr, char *, char *, int *, int);
+static void rec_print(node_ptr, char *, int);
 
 
-dict_ptr generate_dict(){
-    dict_ptr dict = (dict_ptr)malloc(sizeof(dict_t));
-    node_ptr *t;
-    int i;
+uint8_t map_charset(char c){
+    if (c == '-') return 0;
+    else if (c >= '0' && c <= '9') return (c - 47);
+    else if (c >= 'A' && c <= 'Z') return (c - 54);
+    else if (c >= 'a' && c <= 'z') return (c - 59);
+    else return 37; // maps '_'
+}
+static char unmap_charset(int x){
+    if (x == 0) return '-';
+    else if (x >= 1 && x <= 10) return (x + 47);
+    else if (x >= 10 && x <= 36) return (x + 54);
+    else if (x >= 38 && x <= 63) return (x + 59);
+    else return '_';
+}
 
-    dict->size = BASE_SIZE;
-    dict->items = 0;
-    dict->collisions = 0;
-    dict->head = NULL;
+// initializes children to NULL and prune to 0
+node_ptr generate_node(){
+    node_ptr n = (node_ptr) malloc(sizeof(node_t));
 
-    // NULL == (void *) 0 != 0, calloc makes this platform dependent
-    t = (node_ptr *)malloc(BASE_SIZE * sizeof(node_ptr));
-    for (i = 0; i < BASE_SIZE; ++i) t[i] = NULL;
-    dict->table = t;
+    n->nodes = (node_ptr *) calloc(CHARSET, sizeof(node_ptr));
+    n->prune = 0;
 
-    return dict;
+    return n;
 }
 
 
-static uint32_t hash(char * key, uint32_t size){
-    uint32_t h = 3323198485ul;
-    for (; *key; ++key) {
-        h ^= *key;
-        h *= 0x5bd1e995;
-        h ^= h >> 15;
-    }
-    return h % size;
-}
+void insert(node_ptr trie, int wordsize, char *word){
+    node_ptr new;
+    int i, index;
 
+    // iterate until before the last letter
+    for (i = 0; i < wordsize - 1; ++i){
+        index = map_charset(word[i]);
 
-node_ptr insert(dict_ptr D, char *s){
-    node_ptr new = (node_ptr)malloc(sizeof(node_t));
-    uint32_t h = hash(s, D->size);
-
-    new->word = s;
-    new->next = NULL;
-    if (D->table[h] == NULL){
-        D->table[h] = new;
-        new->chain = NULL;
-    } else { // head insert
-        new->chain = D->table[h];
-        D->table[h] = new;
-        ++(D->collisions);
-    }
-    ++(D->items);
-
-    return new;
-}
-
-
-uint8_t search(dict_ptr D, char *s){
-    uint32_t h = hash(s, D->size);
-    node_ptr curr = D->table[h];
-
-    while (curr != NULL){
-        if (strcmp(s, curr->word) == 0) return 1;
-        curr = curr->chain;
-    };
-    return 0;
-}
-
-
-static void swap(node_ptr *src, node_ptr *tgt){
-    node_ptr temp = *src;
-
-    *src = *tgt;
-    *tgt = temp;
-}
-
-static node_ptr *partition(node_ptr *start, node_ptr *end){
-    char *pivot;
-
-    // Hoare partitioning, middle element as pivot
-    // (start + end) / 2 returns error for obscure reason
-    pivot = (*(start + (end - start) / 2))->word;
-    --start;
-    ++end;
-
-    while (1){
-        while (strcmp((*(++start))->word, pivot) < 0);
-        while (strcmp((*(--end))->word, pivot) > 0);
-
-        if (start >= end) return end;
-        swap(start, end);
-    }
-}
-
-void quicksort(node_ptr *start, node_ptr *end){
-    node_ptr *pivot;
-
-    if (start < end){
-        pivot = partition(start, end);
-        quicksort(start, pivot);
-        quicksort(pivot + 1, end);
-    }
-}
-
-
-// this can never be performed on an empty list
-void sequential_insert(dict_ptr D, node_ptr *buffer, int len){
-    node_ptr prev, curr;
-    int i = 0;
-
-    curr = D->head;
-    prev = NULL;
-    while (curr != NULL && i < len){
-        // buffer[i] goes before curr, insert and stay put
-        if (strcmp(curr->word, buffer[i]->word) > 0){
-            if (prev == NULL) D->head = buffer[i];
-            else prev->next = buffer[i];
-
-            buffer[i]->next = curr;
-            prev = buffer[i];
-            ++i;
-            ++(D->len);
-        } else { // buffer[i] goes after curr, move down list
-            prev = curr;
-            curr = curr->next;
+        if (trie->nodes[index] == NULL){
+            // new node
+            new = generate_node();
+            trie->nodes[index] = new;
+            trie = new;
+        } else {
+            // old node
+            trie = trie->nodes[index];
         }
     }
-    while (i < len){
-        // since list has at least one element, prev is never NULL in loop
-        prev->next = buffer[i];
-        prev = buffer[i];
-        ++i;
-        ++(D->len);
-    }
+
+    // insert final node with new->nodes = NULL
+    index = map_charset(word[i]);
+    trie->nodes[index] = (node_ptr)calloc(1, sizeof(node_t));
 }
 
 
-void print_list(dict_ptr D, FILE *output){
-    node_ptr curr;
+uint8_t search(node_ptr trie, int wordsize, char *word){
+    int i, index;
 
-    for (curr = D->head; curr != NULL; curr = curr->next){
-        fputs(curr->word, output);
-        fputs("\n", output);
+    // iterate through the full word
+    for (i = 0; i < wordsize; ++i){
+        index = map_charset(word[i]);
+
+        if (trie->nodes[index] == NULL) return 0;
+        else trie = trie->nodes[index];
     }
+
+    return 1;
 }
 
+/*
+    OCCS[CHARSET]:
+x = -1    -->  number of occurrences is not bound
+x <  0    -->  occurs at least -x - 1 times (e.g. -3 > 2 occurrences)
+x >= 0    -->  occurs exactly x times
 
-// free pointers
-static void empty_blocks(node_ptr curr){ //linear traversal, resets .next fields
-    if (curr->next != NULL) {
-        empty_blocks(curr->next);
-        curr->next = NULL;
-    }
-}
-void reset_list(dict_ptr D){
-    if (D->head != NULL){
-        empty_blocks(D->head);
-        D->head = NULL;
-        D->len = 0;
-    }
-}
+occurrences do not include '+' matches
+*/
+static void calculate_occs(char *s, char *eval, int *occs){
+    int i, index;
 
-void free_dict(dict_ptr D){
-    node_ptr curr, temp;
-    int i;
+    // set all occs to -1 (unbound)
+    for (i = 0; i < CHARSET; ++i) occs[i] = -1;
 
-    for (i = 0; i < D->size; ++i){
-        curr = D->table[i];
-        while(curr != NULL){
-            temp = curr;
-            curr = curr->chain;
-            free(temp->word);
-            free(temp);
+    for (i = 0; s[i] != '\0'; ++i){
+        index = map_charset(s[i]);
+
+        // if '|' increase the minimum amount
+        if (eval[i] == '|' && occs[index] < 0) --(occs[index]);
+        // if '/' set the exact amount, -1 --> 0  -3 --> 2
+        else if (eval[i] == '/' && occs[index] < 0) {
+            occs[index] = -(occs[index]) - 1;
         }
     }
-    free(D->table);
-    free(D);
+}
+
+
+static int rec_prune(node_ptr trie, char *s, char *eval, int *occs, int depth){
+    int i, index, count;
+
+    // branch has been pruned, ignore it
+    if (trie->prune == 1) return 0;
+
+    // reached a leaf
+    if (trie->nodes == NULL){
+        for (i = 0; s[i] != '\0'; ++i){
+            index = map_charset(s[i]);
+            if (occs[index] != 0 && occs[index] != -1){
+                // not meeting exact/minimum occurrences of some letters
+                trie->prune = 1;
+                return 0;
+            }
+        }
+        return 1;
+    }
+
+    index = map_charset(s[depth]);
+    if (eval[depth] == '+'){
+        // prune all except nodes[index]
+        for (i = 0; i < CHARSET; ++i){
+            if (i != index && trie->nodes[i] != NULL){
+                trie->nodes[i]->prune = 1;
+            }
+        }
+        // only call on correct letter, no need to adjust occurrences
+        if (trie->nodes[index] != NULL){
+            return rec_prune(trie->nodes[index], s, eval, occs, depth + 1);
+        } else return 0;
+
+    } else {
+        // prune only nodes[index]
+        for (i = 0, count = 0; i < CHARSET; ++i) {
+            if (trie->nodes[i] != NULL){
+                //prune chars that do not appear or are misplaced
+                if (occs[i] == 0 || i == index) trie->nodes[i]->prune = 1;
+                else {
+                    if (occs[i] == -1){
+                        // occurrences unbound, do not modify array
+                        count += rec_prune(trie->nodes[i], s, eval, occs, depth + 1);
+                    } else if (occs[i] < -1){
+                        // decrease minimum occurrences
+                        ++(occs[i]);
+                        count += rec_prune(trie->nodes[i], s, eval, occs, depth + 1);
+                        --(occs[i]);
+                    } else {
+                        // decrease exact occurrences
+                        --(occs[i]);
+                        count += rec_prune(trie->nodes[i], s, eval, occs, depth + 1);
+                        ++(occs[i]);
+                    }
+                }
+            }
+        }
+        return count;
+    }
+}
+
+int prune_trie(node_ptr trie, char *s, char *eval){
+    int occs[CHARSET];
+
+    calculate_occs(s, eval, occs);
+    return rec_prune(trie, s, eval, occs, 0);
+}
+
+
+static void rec_print(node_ptr trie, char *word, int depth){
+    int i;
+
+    if (trie->nodes == NULL) {
+        puts(word);
+        return;
+    }
+
+    for (i = 0; i < CHARSET; ++i){
+        if (trie->nodes[i] != NULL && trie->nodes[i]->prune == 0){
+            word[depth] = unmap_charset(i);
+            rec_print(trie->nodes[i], word, depth + 1);
+        }
+    }
+}
+
+void print_trie(node_ptr trie, int wordsize){
+    char *word = (char *) malloc((wordsize + 1) * sizeof(char));
+
+    word[wordsize] = '\0';
+    rec_print(trie, word, 0);
 }

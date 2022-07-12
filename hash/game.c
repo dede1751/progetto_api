@@ -25,7 +25,7 @@ void safe_scanf(int *x, FILE *fp){
 static uint8_t map_charset(char c){
     if (c == '-') return 0;
     else if (c >= '0' && c <= '9') return (c - 47);
-    else if (c >= 'A' && c <= 'Z') return (c - 53);
+    else if (c >= 'A' && c <= 'Z') return (c - 54);
     else if (c >= 'a' && c <= 'z') return (c - 59);
     else return 37; // maps '_'
 }

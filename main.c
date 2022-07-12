@@ -3,19 +3,37 @@
 
 
 int main(){
-    dict_ptr word_dict = generate_dict();
-    int wordsize, restart;
-    FILE *input = fopen("/home/andrea/Documents/progetto_api/dum_e/upto18.txt", "r");
-    FILE *output = fopen("/home/andrea/Documents/progetto_api/dum_e/dump.txt", "w");
+    node_ptr trie = generate_node();
+    int wordsize;
+    char example_ref[6]    = "LH29F";
+    char example_guess1[6] = "1GhpD";
+    char example_guess2[6] = "0Iflt";
+    // char example_guess3[6] = "CldNC";
 
-    // save initial wordlist on the tree
-    safe_scanf(&wordsize, input);
-    initial_read(word_dict, wordsize, input);
+    char *eval;
+    int count;
 
-    do { // main game loop
-        restart = new_game(word_dict, wordsize, input, output);
-    } while(restart == 1);
+    safe_scanf(&wordsize);
 
-    free_dict(word_dict);
+
+    initial_read(trie, wordsize);
+    //print_trie(dict);
+
+    eval = calculate_eval(example_ref, example_guess1, 5);
+    puts(eval);
+    count = prune_trie(trie, example_guess1, eval);
+    printf("%d", count);
+
+    eval = calculate_eval(example_ref, example_guess2, 5);
+    puts(eval);
+    count = prune_trie(trie, example_guess2, eval);
+    printf("%d", count);
+
+    // eval = calculate_eval(example_ref, example_guess3, 5);
+    // puts(eval);
+    // count = prune_trie(dict, example_guess3, eval);
+    // printf("%d", count);
+    //print_trie(dict);
+
     exit(EXIT_SUCCESS);
 }
