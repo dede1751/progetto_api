@@ -5,7 +5,7 @@
         "type": "cppdbg",
         "request": "launch",
         "program": "${workspaceFolder}/debug/build",
-        "args": ["<", "${workspaceFolder}/dum_e/gen_large.txt"],
+        "args": ["<", "${workspaceFolder}/dum_e/upto18_insert_only.txt"],
         "stopAtEntry": true,
         "cwd": "${fileDirname}",
         "environment": [],

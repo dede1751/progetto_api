@@ -6,7 +6,7 @@
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Thu Jul 14 00:42:59 2022
+# Make data base, printed on Thu Jul 14 13:57:27 2022
 
 # Variables
 
@@ -17,7 +17,7 @@ LC_ALL = C
 # environment
 NO_AT_BRIDGE = 1
 # environment
-I3SOCK = /run/user/1000/i3/ipc-socket.636
+I3SOCK = /run/user/1000/i3/ipc-socket.627
 # environment
 LC_NAME = en_US.UTF-8
 # environment
@@ -57,7 +57,7 @@ DBGEXE = $(DBGDIR)/$(EXE)
 # automatic
 %F = $(notdir $%)
 # environment
-ALACRITTY_SOCKET = /run/user/1000/Alacritty-:0-835.sock
+ALACRITTY_SOCKET = /run/user/1000/Alacritty-:0-826.sock
 # environment
 VSCODE_CODE_CACHE_PATH = /home/andrea/.config/Code/CachedData/92d25e35d9bf1a6b16f7d0758f25d48ace11e5b9
 # environment
@@ -97,7 +97,7 @@ MAKEFILE_LIST := makefile
 # makefile (from 'makefile', line 27)
 RELOBJS = $(addprefix $(RELDIR)/, $(OBJS))
 # environment
-VSCODE_PID = 928
+VSCODE_PID = 1049
 # environment
 XDG_SESSION_TYPE = x11
 # automatic
@@ -153,7 +153,7 @@ XDG_SEAT = seat0
 # environment
 XDG_CURRENT_DESKTOP = i3
 # environment
-ALACRITTY_LOG = /tmp/Alacritty-835.log
+ALACRITTY_LOG = /tmp/Alacritty-826.log
 # environment
 LS_COLORS = 
 # automatic
@@ -245,9 +245,9 @@ LC_IDENTIFICATION = en_US.UTF-8
 
 # Directories
 
-# . (device 66309, inode 786735): 17 files, no impossibilities.
+# . (device 66309, inode 786735): 16 files, no impossibilities.
 
-# 17 files, no impossibilities in 1 directories.
+# 16 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -279,6 +279,7 @@ debug: debug/build
 #  Implicit rule search has not been done.
 #  File does not exist.
 #  File has not been updated.
+ 
 
 clean:
 #  Phony target (prerequisite of .PHONY).
@@ -299,7 +300,6 @@ release/build: release/structures.o release/game.o release/main.o
 #  Modification time never checked.
 #  File has not been updated.
 #  recipe to execute (from 'makefile', line 52):
- 
 	$(CC) $(CFLAGS) $(RELCFLAGS) -o $(RELEXE) $^
 
 debug/build: debug/structures.o debug/game.o debug/main.o
@@ -409,12 +409,12 @@ release/main.o:
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 37 / storage = 360 B / avg = 9 B
-# current buf: size = 8162 B / used = 360 B / count = 37 / avg = 9 B
+# strcache buffers: 1 (0) / strings = 36 / storage = 345 B / avg = 9 B
+# current buf: size = 8162 B / used = 345 B / count = 36 / avg = 9 B
 
-# strcache performance: lookups = 68 / hit rate = 45%
+# strcache performance: lookups = 67 / hit rate = 46%
 # hash-table stats:
-# Load=37/8192=0%, Rehash=0, Collisions=0/68=0%
-# Finished Make data base on Thu Jul 14 00:42:59 2022
+# Load=36/8192=0%, Rehash=0, Collisions=0/67=0%
+# Finished Make data base on Thu Jul 14 13:57:27 2022
 
  

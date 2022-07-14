@@ -3,7 +3,7 @@
 
 
 int main(){
-    node_t *trie = generate_trie();
+    node_t *trie = initialize_trie();
     int wordsize;
     // char example_ref[6]    = "LH29F";
     // char example_guess1[6] = "1GhpD";
@@ -17,7 +17,6 @@ int main(){
 
     initial_read(trie, wordsize);
     //print_trie(trie, wordsize);
-    // //print_trie(dict);
 
     // eval = calculate_eval(example_ref, example_guess1, 5);
     // puts(eval);
