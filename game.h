@@ -2,7 +2,6 @@
 #define GAME_H_
 
 #include "structures.h"
-#define BUFSIZE 1024
 
 // /*
 //  *      REQUIREMENTS:
@@ -44,7 +43,7 @@ void safe_fgets(char *, int);
 void safe_scanf(int *);
 
 char *calculate_eval(char *, char *, int);
-void initial_read(node_ptr, int);
+void initial_read(node_t *, int);
 // uint8_t new_game(dict_ptr, int, FILE *, FILE *);
 
 #endif

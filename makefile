@@ -25,7 +25,7 @@ DBGCFLAGS = -g3 -DDEBUG
 RELDIR = release
 RELEXE = $(RELDIR)/$(EXE)
 RELOBJS = $(addprefix $(RELDIR)/, $(OBJS))
-RELCFLAGS = -O3 -DNDEBUG
+RELCFLAGS = -O2 -DNDEBUG
 
 .PHONY: all clean debug prep release remake
 

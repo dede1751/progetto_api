@@ -246,12 +246,12 @@ char *calculate_eval(char *ref, char *s, int wordsize){
 // }
 
 
-void initial_read(node_ptr trie, int wordsize){
+void initial_read(node_t *trie, int wordsize){
     char *buff = (char *) malloc((wordsize + 1) * sizeof(char));
 
     safe_fgets(buff, wordsize);
     while (buff[0] != '+'){
-        insert(trie, wordsize, buff);
+        insert(trie, buff);
 
         getchar(); //trailing \n
         safe_fgets(buff, wordsize);
@@ -264,7 +264,7 @@ void initial_read(node_ptr trie, int wordsize){
 
         safe_fgets(buff, wordsize);
         while (buff[0] != '+'){
-            insert(trie, wordsize, buff);
+            insert(trie, buff);
 
             getchar(); //trailing \n
             safe_fgets(buff, wordsize);

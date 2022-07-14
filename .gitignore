@@ -6,3 +6,4 @@ dum_e/dump.txt
 .vscode/configurationCache.log
 .gitignore
 .vscode/targets.log
+vg_logfile.out
