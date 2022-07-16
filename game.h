@@ -1,7 +1,7 @@
 #ifndef GAME_H_
 #define GAME_H_
 
-#include "structures.h"
+#include "trie.h"
 
 // /*
 //  *      REQUIREMENTS:
@@ -42,8 +42,14 @@
 void safe_fgets(char *, int);
 void safe_scanf(int *);
 
-char *calculate_eval(char *, char *, int);
-void initial_read(node_t *, int);
+/* Maps/Inverts map on 0-63 interval according to ASCII order */
+uint8_t map_charset(char);
+char unmap_charset(int);
+
+char *calculate_eval(char *, char *, int, char *);
+int prune_trie(trie_t *, char *, char *);
+
+trie_t *initial_read(trie_t *, int);
 // uint8_t new_game(dict_ptr, int, FILE *, FILE *);
 
 #endif

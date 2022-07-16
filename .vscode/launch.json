@@ -5,7 +5,7 @@
         "type": "cppdbg",
         "request": "launch",
         "program": "${workspaceFolder}/debug/build",
-        "args": ["<", "${workspaceFolder}/dum_e/upto18_insert_only.txt"],
+        "args": ["<", "${workspaceFolder}/dum_e/upto18.txt"],
         "stopAtEntry": true,
         "cwd": "${fileDirname}",
         "environment": [],

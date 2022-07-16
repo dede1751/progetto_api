@@ -7,7 +7,7 @@ CFLAGS = -Wall -Werror -Wextra
 #
 # Project files
 #
-SRCS = structures.c game.c main.c
+SRCS = trie.c game.c main.c
 OBJS = $(SRCS:.c=.o)
 EXE  = build
 

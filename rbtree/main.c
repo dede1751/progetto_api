@@ -12,8 +12,8 @@ int main(){
     dict_ptr word_dict = generate_dict();
     char *buff;
     int wordsize, restart;
-    FILE *input = fopen("/Users/andreasgobbi/Documents/uni_works/progetto_api/dum_e/gen_large.txt", "r");
-    FILE *output = fopen("/Users/andreasgobbi/Documents/uni_works/progetto_api/dum_e/dump.txt", "w");
+    FILE *input = fopen("/home/andrea/Documents/progetto_api/dum_e/upto18_copy.txt", "r");
+    FILE *output = fopen("/home/andrea/Documents/progetto_api/dum_e/dump.txt", "w");
 
     // save initial wordlist on the tree
     safe_scanf(&wordsize, input);

@@ -12,6 +12,12 @@
 // static void check_guess(dict_ptr, char *, char *, int, req_ptr, FILE *);
 // static void handle_insert(dict_ptr, int, req_ptr, FILE *);
 
+static void calculate_occs(char *, char *, int *);
+static int rec_check(char *, char *, char *, int *, int);
+static int check_leaf(trie_t *, char *, char *, int *, int);
+static int rec_prune(trie_t *, char *, char *, int *, int);
+
+
 
 void safe_fgets(char *s, int size){
     if (fgets(s, size + 1, stdin) == NULL) exit(EXIT_FAILURE);
@@ -20,9 +26,23 @@ void safe_scanf(int *x){
     if (scanf("%d\n", x) == 0) exit(EXIT_FAILURE);
 }
 
+uint8_t map_charset(char c){
+    if (c == '-') return 0;
+    else if (c >= '0' && c <= '9') return (c - 47);
+    else if (c >= 'A' && c <= 'Z') return (c - 54);
+    else if (c >= 'a' && c <= 'z') return (c - 59);
+    else return 37; // maps '_'
+}
+char unmap_charset(int x){
+    if (x == 0) return '-';
+    else if (x >= 1 && x <= 10) return (x + 47);
+    else if (x >= 10 && x <= 36) return (x + 54);
+    else if (x >= 38 && x <= 63) return (x + 59);
+    else return '_';
+}
 
-char *calculate_eval(char *ref, char *s, int wordsize){
-    char *eval = (char *)calloc(wordsize + 1, sizeof(char));
+
+char *calculate_eval(char *ref, char *s, int wordsize, char *eval){
     uint8_t counts[CHARSET] = {0};
     int i;
     
@@ -44,6 +64,138 @@ char *calculate_eval(char *ref, char *s, int wordsize){
     }
 
     return eval;
+}
+
+
+static void calculate_occs(char *s, char *eval, int *occs){
+    int i, index;
+
+    // set all occs to -1 (unbound)
+    for (i = 0; i < CHARSET; ++i) occs[i] = -1;
+
+    for (i = 0; s[i] != '\0'; ++i){
+        index = map_charset(s[i]);
+
+        // if '|' increase the minimum amount
+        if (eval[i] == '|' && occs[index] < 0) --(occs[index]);
+        // if '/' set the exact amount, -1 --> 0  -3 --> 2
+        else if (eval[i] == '/' && occs[index] < 0) {
+            occs[index] = -(occs[index]) - 1;
+        }
+    }
+}
+
+static int rec_check(char *sfx, char *s, char *eval, int *occs, int depth){
+    int i, index;
+
+    // once we run out of suffix, check that all occs are either -1 or 0
+    if (sfx[0] == '\0'){
+        for (i = 0; s[i] != '\0'; ++i){
+            index = map_charset(s[i]);
+            if (occs[index] != 0 && occs[index] != -1) return 0;
+        }
+        return 1;
+    }
+
+    if (eval[depth] == '+'){ // in case of '+', continue only if it's an exact match
+        if (sfx[0] == s[depth]) {
+            return rec_check(sfx + sizeof(char), s, eval, occs, depth + 1);
+        } else return 0;
+
+    } else { // in case of '|', continue only if it's not a match
+        index = map_charset(sfx[0]);
+
+        if (sfx[0] == s[depth] || occs[index] == 0) return 0;
+        else {
+
+            if (occs[index] == -1){
+                // occurrences unbound, do not modify array
+                return rec_check(sfx + sizeof(char), s, eval, occs, depth + 1);
+            } else if (occs[index] < -1){
+                // decrease minimum occurrences
+                ++(occs[index]);
+                return rec_check(sfx + sizeof(char), s, eval, occs, depth + 1);
+                --(occs[index]);
+            } else {
+                // decrease exact occurrences
+                --(occs[index]);
+                return rec_check(sfx + sizeof(char), s, eval, occs, depth + 1);
+                ++(occs[index]);
+            }
+        }
+    }
+}
+
+static int check_leaf(trie_t *trie, char *s, char *eval, int *occs, int depth){
+    int res, index = map_charset((trie->status)[1]);
+
+    // the first letter of status is already checked by rec_prune
+    if (occs[index] == -1){
+        res = rec_check(trie->status + 2*sizeof(char), s, eval, occs, depth + 1);
+    } else if (occs[index] < -1){
+        ++(occs[index]);
+        res = rec_check(trie->status + 2*sizeof(char), s, eval, occs, depth + 1);
+        --(occs[index]);
+    } else {
+        --(occs[index]);
+        res = rec_check(trie->status + 2*sizeof(char), s, eval, occs, depth + 1);
+        ++(occs[index]);
+    }
+
+    if (res == 0) (trie->status)[0] = PRUNE;
+    return res;
+}
+
+static int rec_prune(trie_t *trie, char *s, char *eval, int *occs, int depth){
+    trie_t *curr;
+    int index, target, total = 0;
+
+    // target letter
+    target = s[depth];
+
+    if (eval[depth] == '+'){ // prune all except target letter's node
+        for (curr = trie; curr != NULL; curr = curr->next){
+            if ((curr->status)[1] == target){ // target letter found
+                if (curr->branch == NULL) total = check_leaf(curr, s, eval, occs, depth);
+                else total = rec_prune(curr->branch, s, eval, occs, depth + 1);
+            } else (curr->status)[0] = PRUNE; // not target, prune
+        }
+
+    } else { // prune only target letter's node
+        for (curr = trie; curr != NULL; curr = curr->next){
+            if ((curr->status)[0] == NO_PRUNE){ // don't consider pruned nodes
+                index = map_charset((curr->status)[1]);
+
+                // if curr is target or has no occurrences left, prune it.
+                if ((curr->status)[1] == target || occs[index] == 0) (curr->status)[0] = PRUNE;
+                else {
+                    if (curr->branch == NULL) total += check_leaf(curr, s, eval, occs, depth);
+                    else { // decrement occs array (like in previous function)
+                        if (occs[index] == -1){
+                            total += rec_prune(curr->branch, s, eval, occs, depth + 1);
+                        } else if (occs[index] < -1){
+                            ++(occs[index]);
+                            total += rec_prune(curr->branch, s, eval, occs, depth + 1);
+                            --(occs[index]);
+                        } else {
+                            --(occs[index]);
+                            total += rec_prune(curr->branch, s, eval, occs, depth + 1);
+                            ++(occs[index]);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return total;
+}
+
+int prune_trie(trie_t *trie, char *s, char *eval){
+    int occs[CHARSET];
+
+    calculate_occs(s, eval, occs);
+    return rec_prune(trie, s, eval, occs, 0);
 }
 
 
@@ -246,12 +398,12 @@ char *calculate_eval(char *ref, char *s, int wordsize){
 // }
 
 
-void initial_read(node_t *trie, int wordsize){
+trie_t *initial_read(trie_t *trie, int wordsize){
     char *buff = (char *) malloc((wordsize + 1) * sizeof(char));
 
     safe_fgets(buff, wordsize);
     while (buff[0] != '+'){
-        insert(trie, buff);
+        trie = insert(trie, buff);
 
         getchar(); //trailing \n
         safe_fgets(buff, wordsize);
@@ -264,7 +416,7 @@ void initial_read(node_t *trie, int wordsize){
 
         safe_fgets(buff, wordsize);
         while (buff[0] != '+'){
-            insert(trie, buff);
+            trie = insert(trie, buff);
 
             getchar(); //trailing \n
             safe_fgets(buff, wordsize);
@@ -274,6 +426,8 @@ void initial_read(node_t *trie, int wordsize){
         while(getchar() != '\n');
     }
     free(buff);
+
+    return trie;
 }
 
 
