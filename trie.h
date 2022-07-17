@@ -8,7 +8,7 @@
 
 #define CHARSET 64
 #define PRUNE 1
-#define NO_PRUNE 0
+#define NO_PRUNE 2
 
 
 /*

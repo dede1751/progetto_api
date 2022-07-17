@@ -6,7 +6,7 @@
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Sun Jul 17 12:53:39 2022
+# Make data base, printed on Sun Jul 17 20:00:01 2022
 
 # Variables
 
@@ -25,7 +25,7 @@ LC_NUMERIC = en_US.UTF-8
 # environment
 VSCODE_CWD = /home/andrea
 # environment
-WINDOWID = 29360130
+WINDOWID = 41943042
 # makefile (from 'makefile', line 17)
 DBGDIR = debug
 # environment
@@ -57,7 +57,7 @@ DBGEXE = $(DBGDIR)/$(EXE)
 # automatic
 %F = $(notdir $%)
 # environment
-ALACRITTY_SOCKET = /run/user/1000/Alacritty-:0-800.sock
+ALACRITTY_SOCKET = /run/user/1000/Alacritty-:0-42748.sock
 # environment
 VSCODE_CODE_CACHE_PATH = /home/andrea/.config/Code/CachedData/92d25e35d9bf1a6b16f7d0758f25d48ace11e5b9
 # environment
@@ -97,7 +97,7 @@ MAKEFILE_LIST := makefile
 # makefile (from 'makefile', line 27)
 RELOBJS = $(addprefix $(RELDIR)/, $(OBJS))
 # environment
-VSCODE_PID = 1017
+VSCODE_PID = 42988
 # environment
 XDG_SESSION_TYPE = x11
 # automatic
@@ -153,7 +153,7 @@ XDG_SEAT = seat0
 # environment
 XDG_CURRENT_DESKTOP = i3
 # environment
-ALACRITTY_LOG = /tmp/Alacritty-800.log
+ALACRITTY_LOG = /tmp/Alacritty-42748.log
 # environment
 LS_COLORS = 
 # automatic
@@ -409,12 +409,12 @@ release/main.o:
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 37 / storage = 328 B / avg = 8 B
-# current buf: size = 8162 B / used = 328 B / count = 37 / avg = 8 B
+# strcache buffers: 1 (0) / strings = 37 / storage = 334 B / avg = 9 B
+# current buf: size = 8162 B / used = 334 B / count = 37 / avg = 9 B
 
 # strcache performance: lookups = 68 / hit rate = 45%
 # hash-table stats:
 # Load=37/8192=0%, Rehash=0, Collisions=0/68=0%
-# Finished Make data base on Sun Jul 17 12:53:39 2022
+# Finished Make data base on Sun Jul 17 20:00:01 2022
 
  

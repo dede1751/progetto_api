@@ -7,17 +7,13 @@ static req_t *generate_reqs(int);
 static void free_req(req_t *);
 
 static void calculate_occs(char *, char *, int *);
-static char *analyze_guess(char *, char *, int , int *, req_t *);
+static void analyze_guess(char *, char *, char *, int , int *, req_t *);
 
 static int check_prev(char *, char *, char *, int *, int);
-static int check_leaf_prev(trie_t *, char *, char *, int *, int);
 static int prune_prev(trie_t *, char *, char *, int *, int);
-static void handle_simple_guess(trie_t *, int, char *, char *, req_t *);
 
 static int check_full(char *, req_t *, int);
-static int check_leaf_full(trie_t *, req_t *, int);
 static int prune_full(trie_t *, req_t *, int);
-static void handle_full_guess(trie_t *, int, char *, char *, req_t *);
 
 static trie_t *handle_insert(trie_t *, int);
 
@@ -108,21 +104,23 @@ static void calculate_occs(char *s, char *eval, int *occs){
  * 
  * @param ref       The reference string.
  * @param s         The guess string.
+ * @param eval      String to write eval to
  * @param wordsize  Length of the strings.
  * @param occs      int[64] array, passed to use later for pruning.
  * @param reqs      Pointer to the requirements struct.
  * @return Void.
  */
-static char *analyze_guess(char *ref, char *s, int wordsize, int *occs, req_t *reqs){
-    char *eval = (char *)calloc(wordsize + 1, sizeof(char));
+static void analyze_guess(char *ref, char *s, char *eval, int wordsize, int *occs, req_t *reqs){
     uint8_t counts[CHARSET] = {0};
     int i, index;
-    
+
     // count char occurrences in ref and handle perfect matches
     for(i = 0; i < wordsize; ++i){
         index  = map_charset(ref[i]);
-        if (ref[i] != s[i]) ++(counts[index]);
-        else {
+        if (ref[i] != s[i]){
+            eval[i] = '\0';             // reset eval
+            ++(counts[index]);
+        } else {
             eval[i] = '+';
             (reqs->match)[i] = s[i];
         }
@@ -155,8 +153,6 @@ static char *analyze_guess(char *ref, char *s, int wordsize, int *occs, req_t *r
             (occs[index] >= 0 || occs[index] < (reqs->occs)[index])
         ) (reqs->occs)[index] = occs[index];
     }
-
-    return eval;
 }
 
 static int check_prev(char *sfx, char *s, char *eval, int *occs, int depth){
@@ -176,7 +172,7 @@ static int check_prev(char *sfx, char *s, char *eval, int *occs, int depth){
     count = occs[index];
     if (( count == 0 )                              ||
         (eval[depth] == '+' && sfx[0] != s[depth])  ||
-        (eval[depth] != '/' && sfx[0] == s[depth])
+        (eval[depth] != '+' && sfx[0] == s[depth])
     ) return 0;
     
     if (count == -1){
@@ -194,32 +190,9 @@ static int check_prev(char *sfx, char *s, char *eval, int *occs, int depth){
     return res;
 }
 
-static int check_leaf_prev(trie_t *trie, char *s, char *eval, int *occs, int depth){
-    int res, index = map_charset((trie->status)[1]);
-    int count = occs[index];
-
-    // the first letter of status is already checked by the pruning function
-    if (count == -1){
-        res = check_prev(trie->status + 2*sizeof(char), s, eval, occs, depth + 1);
-    } else if (count < -1){
-        ++(occs[index]);
-        res = check_prev(trie->status + 2*sizeof(char), s, eval, occs, depth + 1);
-        --(occs[index]);
-    } else {
-        --(occs[index]);
-        res = check_prev(trie->status + 2*sizeof(char), s, eval, occs, depth + 1);
-        ++(occs[index]);
-    }
-
-    if (res == 0) (trie->status)[0] = PRUNE;
-
-    return res;
-}
-
-
 static int prune_prev(trie_t *trie, char *s, char *eval, int *occs, int depth){
     trie_t *curr;
-    int index, count, total = 0;
+    int index, count, res, total = 0;
     char target;
 
     target = s[depth];
@@ -237,7 +210,21 @@ static int prune_prev(trie_t *trie, char *s, char *eval, int *occs, int depth){
 
                 if (count == 0) (curr->status)[0] = PRUNE;
                 else if (curr->branch == NULL){
-                    total += check_leaf_prev(curr, s, eval, occs, depth);
+                    if (count == -1){
+                        res = check_prev(curr->status + 2*sizeof(char), s, eval, occs, depth + 1);
+                    } else if (count < -1){
+                        ++(occs[index]);
+                        res = check_prev(curr->status + 2*sizeof(char), s, eval, occs, depth + 1);
+                        --(occs[index]);
+                    } else {
+                        --(occs[index]);
+                        res = check_prev(curr->status + 2*sizeof(char), s, eval, occs, depth + 1);
+                        ++(occs[index]);
+                    }
+
+                    if (res == 0) (curr->status)[0] = PRUNE;
+                    total += res;
+    
                 } else {
                     if (count == -1){
                         total += prune_prev(curr->branch, s, eval, occs, depth + 1);
@@ -256,20 +243,6 @@ static int prune_prev(trie_t *trie, char *s, char *eval, int *occs, int depth){
     }
 
     return total; 
-}
-
-static void handle_simple_guess(trie_t *trie, int wordsize, char *ref, char *s, req_t *reqs){
-    char *eval;
-    int occs[CHARSET], count;
-
-    eval = analyze_guess(ref, s, wordsize, occs, reqs);
-    count = prune_prev(trie, s, eval, occs, 0);
-
-    puts(eval);
-    printf("%d\n", count);
-
-    free(eval);
-
 }
 
 
@@ -288,7 +261,7 @@ static int check_full(char *sfx, req_t *reqs, int depth){
     index = map_charset(sfx[0]);
     count = (reqs->occs)[index];
     if (( count == 0 )                                                      ||
-        ((reqs->match)[depth] != '*' && sfx[0] == (reqs->match)[depth])     ||
+        ((reqs->match)[depth] != '*' && sfx[0] != (reqs->match)[depth])     ||
         ((reqs->pos)[index][depth] == 0)
     ) return 0;
     
@@ -307,30 +280,10 @@ static int check_full(char *sfx, req_t *reqs, int depth){
     return res;
 }
 
-static int check_leaf_full(trie_t *trie, req_t *reqs, int depth){
-    int res, index = map_charset((trie->status)[1]);
-    int count = (reqs->occs)[index];
-
-    // the first letter of status is already checked by the pruning function
-    if (count == -1){
-        res = check_full(trie->status + 2*sizeof(char), reqs, depth + 1);
-    } else if (count < -1){
-        ++((reqs->occs)[index]);
-        res = check_full(trie->status + 2*sizeof(char), reqs, depth + 1);
-        --((reqs->occs)[index]);
-    } else {
-        --((reqs->occs)[index]);
-        res = check_full(trie->status + 2*sizeof(char), reqs, depth + 1);
-        ++((reqs->occs)[index]);
-    }
-
-    if (res == 0) (trie->status)[0] = PRUNE;
-    return res;
-}
 
 static int prune_full(trie_t *trie, req_t *reqs, int depth){
     trie_t *curr;
-    int index, count, total = 0;
+    int index, count, res, total = 0;
     char target;
 
     target = (reqs->match)[depth];
@@ -346,7 +299,21 @@ static int prune_full(trie_t *trie, req_t *reqs, int depth){
 
                 if (count == 0 || (reqs->pos)[index][depth] == 0) (curr->status)[0] = PRUNE;
                 else if (curr->branch == NULL) {
-                    total += check_leaf_full(curr, reqs, depth);
+                    if (count == -1){
+                        res = check_full(curr->status + 2*sizeof(char), reqs, depth + 1);
+                    } else if (count < -1){
+                        ++((reqs->occs)[index]);
+                        res = check_full(curr->status + 2*sizeof(char), reqs, depth + 1);
+                        --((reqs->occs)[index]);
+                    } else {
+                        --((reqs->occs)[index]);
+                        res = check_full(curr->status + 2*sizeof(char), reqs, depth + 1);
+                        ++((reqs->occs)[index]);
+                    }
+
+                    if (res == 0) (curr->status)[0] = PRUNE;
+                    total += res;
+    
                 } else {
                     if (count == -1){
                         total += prune_full(curr->branch, reqs, depth + 1);
@@ -365,19 +332,6 @@ static int prune_full(trie_t *trie, req_t *reqs, int depth){
     }
 
     return total; 
-}
-
-static void handle_full_guess(trie_t *trie, int wordsize, char *ref, char *s, req_t *reqs){
-    char *eval;
-    int occs[CHARSET], count;
-
-    eval = analyze_guess(ref, s, wordsize, occs, reqs);
-    count = prune_full(trie, reqs, 0);
-
-    puts(eval);
-    printf("%d\n", count);
-
-    free(eval);
 }
 
 
@@ -434,8 +388,12 @@ trie_t *new_game(trie_t *trie, int wordsize){
     req_t *reqs = generate_reqs(wordsize);
     char buff[wordsize + 1];
     char ref[wordsize + 1];
+    char eval[wordsize + 1];
     char dump[18];
-    int guesses, insert_flag = 0;
+    int occs[CHARSET];
+    int guesses, count = 0, insert_flag = 0, prune_flag = 1;
+
+    eval[wordsize] = '\0';
 
     // grab reference word and number of guesses
     safe_fgets(ref, wordsize);
@@ -448,30 +406,46 @@ trie_t *new_game(trie_t *trie, int wordsize){
         if(buff[0] == '+'){
     
             if (buff[1] == 's'){            // +stampa_filtrate
-
                 if (wordsize <= 16) while (getchar() != '\n');
-                print_trie(trie, wordsize);
-            } else if (buff[1] == 'i'){     // +inserisci_inizio
 
+                if (insert_flag) {
+                    prune_full(trie, reqs, 0);
+                    insert_flag = 0;
+                }
+                print_trie(trie, wordsize);
+
+            } else if (buff[1] == 'i'){     // +inserisci_inizio
                 if (wordsize <= 17) while (getchar() != '\n');
+    
                 trie = handle_insert(trie, wordsize);
                 insert_flag = 1;
+                if (!prune_flag) prune_flag = 1;
             }
 
         } else{
+
             getchar(); // trailing newline for words
 
-            if (strcmp(ref, buff) == 0) { // guessed correctly
+            if (strcmp(ref, buff) == 0) {           // guessed correctly
                 puts("ok");
                 break;
-            } else if (search(trie, buff) == 0) {
+            } else if (search(trie, buff) == 0) {   // word not in dict
                 puts("not_exists");
             } else {
-                if (insert_flag) { // prior command was insertion
-                    handle_full_guess(trie, wordsize, ref, buff, reqs);
-                    insert_flag = 0;
-                } else handle_simple_guess(trie, wordsize, ref, buff, reqs);
+                // first get the occs array and eval
+                analyze_guess(ref, buff, eval, wordsize, occs, reqs);
 
+                if (insert_flag) {          // previous command was insertion
+                    count = prune_full(trie, reqs, 0);
+                    insert_flag = 0;
+                } else if (prune_flag) {    // more than 1 possible word
+                    count = prune_prev(trie, buff, eval, occs, 0);
+                }
+
+                if (count == 1) prune_flag = 0;
+
+                puts(eval);
+                printf("%d\n", count);
                 --guesses;
             }
         }

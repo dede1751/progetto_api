@@ -5,7 +5,7 @@
         "type": "cppdbg",
         "request": "launch",
         "program": "${workspaceFolder}/debug/build",
-        "args": ["<", "${workspaceFolder}/dum_e/test3.txt"],
+        "args": ["<", "${workspaceFolder}/tests/heavy_short/input_HS004.txt"],
         "stopAtEntry": true,
         "cwd": "${fileDirname}",
         "environment": [],
