@@ -5,39 +5,44 @@
 
 int main(){
     trie_t *trie = NULL;
+    req_t *reqs = (req_t *) malloc(sizeof(req_t));
     int wordsize;
+
+    // test3
+    // char example_ref[6]    = "CACAC";
+    // char example_guess1[6] = "GbddC";
+    // char example_guess2[6] = "AAbld";
+    // char example_guess3[6] = "CldNC";
+    // char example_guess4[6] = "CAGml";
+    // char example_guess5[6] = "AACCd";
+
+    // test1
+    // char example_ref[6]    = "2rj9R";
+    // char example_guess1[6] = "2PFdd";
+    // char example_guess2[6] = "2rz9R";
+    // char example_guess3[6] = "2rq9R";
+
+    // upto18
     char example_ref[6]    = "LH29F";
     char example_guess1[6] = "1GhpD";
     char example_guess2[6] = "0Iflt";
-    // char example_guess3[6] = "CldNC";
 
-    char *eval;
-    int count;
 
     safe_scanf(&wordsize);
-    eval = (char *)calloc(wordsize + 1, sizeof(char));
+    generate_req(wordsize, reqs);
 
     trie = initial_read(trie, wordsize);
-    count = count_trie(trie);
-    // print_trie(trie, wordsize);
 
-    eval = calculate_eval(example_ref, example_guess1, 5, eval);
-    puts(eval);
-    count = prune_trie(trie, example_guess1, eval);
-    printf("%d", count);
+    handle_simple_guess(trie, wordsize, example_ref, example_guess1, reqs);
+    // handle_simple_guess(trie, wordsize, example_ref, example_guess2, reqs);
+    // handle_simple_guess(trie, wordsize, example_ref, example_guess3, reqs);
+    // handle_simple_guess(trie, wordsize, example_ref, example_guess4, reqs);
 
-    eval = calculate_eval(example_ref, example_guess2, 5, eval);
-    puts(eval);
-    count = prune_trie(trie, example_guess2, eval);
-    printf("%d", count);
+    clear_trie(trie);
 
-    // eval = calculate_eval(example_ref, example_guess3, 5);
-    // puts(eval);
-    // count = prune_trie(dict, example_guess3, eval);
-    // printf("%d", count);
-    //print_trie(dict);
-    
-    // free_trie(trie);
+    handle_full_guess(trie, wordsize, example_ref, example_guess2, reqs);
+
+    print_trie(trie, wordsize);
 
     exit(EXIT_SUCCESS);
 }

@@ -1,21 +1,19 @@
 #include "game.h"
 
-// char *calculate_eval(char *, char *, int);
-
-// static void generate_req(req_ptr, int);
-// static void calculate_req(char *, char *, req_ptr);
-// static uint8_t check_req(char *, req_ptr);
-// static void filter_req(dict_ptr, req_ptr);
-// static void free_req(req_ptr);
-
-// static void create_list(dict_ptr, req_ptr);
-// static void check_guess(dict_ptr, char *, char *, int, req_ptr, FILE *);
-// static void handle_insert(dict_ptr, int, req_ptr, FILE *);
 
 static void calculate_occs(char *, char *, int *);
-static int rec_check(char *, char *, char *, int *, int);
-static int check_leaf(trie_t *, char *, char *, int *, int);
-static int rec_prune(trie_t *, char *, char *, int *, int);
+static char *analyze_guess(char *, char *, int , int *, req_t *);
+
+static int check_prev(char *, char *, char *, int *, int);
+static int check_leaf_prev(trie_t *, char *, char *, int *, int);
+static int prune_prev(trie_t *, char *, char *, int *, int);
+
+static int check_full(char *, req_t *, int);
+static int check_leaf_full(trie_t *, req_t *, int);
+static int prune_full(trie_t *, req_t *, int);
+
+// static void generate_req(req_t *, int);
+// static void free_req(req_t *);
 
 
 
@@ -26,7 +24,8 @@ void safe_scanf(int *x){
     if (scanf("%d\n", x) == 0) exit(EXIT_FAILURE);
 }
 
-uint8_t map_charset(char c){
+
+int map_charset(char c){
     if (c == '-') return 0;
     else if (c >= '0' && c <= '9') return (c - 47);
     else if (c >= 'A' && c <= 'Z') return (c - 54);
@@ -39,31 +38,6 @@ char unmap_charset(int x){
     else if (x >= 10 && x <= 36) return (x + 54);
     else if (x >= 38 && x <= 63) return (x + 59);
     else return '_';
-}
-
-
-char *calculate_eval(char *ref, char *s, int wordsize, char *eval){
-    uint8_t counts[CHARSET] = {0};
-    int i;
-    
-    // count char occurrences in ref and handle perfect matches
-    for(i = 0; i < wordsize; ++i){
-        if (ref[i] != s[i]) ++(counts[map_charset(ref[i])]);
-        else eval[i] = '+';
-    }
-
-    // handle imperfect matches and exclusions
-    for (i = 0; i < wordsize; ++i){
-        if (eval[i] != '+'){
-            if (counts[map_charset(s[i])] == 0) eval[i] = '/';
-            else {
-                eval[i] = '|';
-                --(counts[map_charset(s[i])]);
-            }
-        }    
-    }
-
-    return eval;
 }
 
 
@@ -85,7 +59,112 @@ static void calculate_occs(char *s, char *eval, int *occs){
     }
 }
 
-static int rec_check(char *sfx, char *s, char *eval, int *occs, int depth){
+
+/** @brief Prints evaluation and modifies requirements accordingly
+ *
+ *  Handles both evaluation and the requirements struct:
+ *  evaluation is done by counting occurrences in the ref string and then, for
+ *  each character in the s string, choosing '\' or '|' based on occurrences
+ *  left. It then prints the eval string.
+ * 
+ *  Requirements calculation happens in multiple stages:
+ *      - matching characters are flagged on the first pass of ref
+ *      - impossible positions happen whenever eval is '|' or '/', so they are
+ *        computed on the second pass on s
+ *      - finally we use the eval string to compute occurrence bounds, and apply
+ *        those to the requirements struct where needed.
+ * 
+ * @param ref       The reference string.
+ * @param s         The guess string.
+ * @param wordsize  Length of the strings.
+ * @param occs      int[64] array, passed to use later for pruning.
+ * @param reqs      Pointer to the requirements struct.
+ * @return Void.
+ */
+static char *analyze_guess(char *ref, char *s, int wordsize, int *occs, req_t *reqs){
+    char *eval = (char *)calloc(wordsize + 1, sizeof(char));
+    uint8_t counts[CHARSET] = {0};
+    int i, index;
+    
+    // count char occurrences in ref and handle perfect matches
+    for(i = 0; i < wordsize; ++i){
+        index  = map_charset(ref[i]);
+        if (ref[i] != s[i]) ++(counts[index]);
+        else {
+            eval[i] = '+';
+
+            // first time we find an exact match, we reduce previous bounds
+            if ((reqs->match)[i] == '*'){
+                (reqs->match)[i] = s[i];
+                if ((reqs->occs)[index] > 0) --((reqs->occs)[index]);
+                else if ((reqs->occs)[index] < -1) ++((reqs->occs)[index]);
+            }
+        }
+    }
+
+    // handle imperfect matches and exclusions
+    for (i = 0; i < wordsize; ++i){
+        if (eval[i] != '+'){
+            index = map_charset(s[i]);
+            if (counts[index] == 0) eval[i] = '/';
+            else {
+                eval[i] = '|';
+                --(counts[index]);
+            }
+
+            // already get rid of impossible positions according to eval
+            (reqs->pos)[index][i] = 0;
+        }    
+    }
+
+    // once eval is computed, get the occurrences it imposes
+    calculate_occs(s, eval, occs);
+
+    // use occs to fix up requirements
+    for (i = 0; i < wordsize; ++i){
+        index = map_charset(s[i]);
+
+        // modify reqs->occs[index] if the new bounds are "stricter"
+        if ((reqs->occs)[index] < 0                                  && 
+            (occs[index] >= 0 || (reqs->occs)[index] > occs[index])
+        ) (reqs->occs)[index] = occs[index];
+    }
+
+    puts(eval);
+    return eval;
+}
+
+
+void generate_req(int wordsize, req_t *reqs){
+    char *matches;
+    uint8_t *p;
+    int i, j;
+
+    matches = (char *)malloc((wordsize + 1) * sizeof(char));
+    for (i = 0; i < wordsize; ++i) matches[i] = '*';
+    matches[wordsize] = '\0';
+    reqs->match = matches;
+
+    for (i = 0; i < CHARSET; ++i) {
+        p = (uint8_t *)malloc((wordsize) * sizeof(uint8_t));
+        for (j = 0; j < wordsize; ++j) p[j] = 1;
+
+        (reqs->pos)[i]  = p;        
+        (reqs->occs)[i] = -1;
+    }
+}
+
+
+void free_req(req_t *reqs){
+    int i;
+    
+    free(reqs->match);
+    for(i = 0; i < CHARSET; ++i) free((reqs->pos)[i]);
+    free(reqs);
+}
+
+
+static int check_prev(char *sfx, char *s, char *eval, int *occs, int depth){
     int i, index;
 
     // once we run out of suffix, check that all occs are either -1 or 0
@@ -99,7 +178,7 @@ static int rec_check(char *sfx, char *s, char *eval, int *occs, int depth){
 
     if (eval[depth] == '+'){ // in case of '+', continue only if it's an exact match
         if (sfx[0] == s[depth]) {
-            return rec_check(sfx + sizeof(char), s, eval, occs, depth + 1);
+            return check_prev(sfx + sizeof(char), s, eval, occs, depth + 1);
         } else return 0;
 
     } else { // in case of '|', continue only if it's not a match
@@ -110,43 +189,48 @@ static int rec_check(char *sfx, char *s, char *eval, int *occs, int depth){
 
             if (occs[index] == -1){
                 // occurrences unbound, do not modify array
-                return rec_check(sfx + sizeof(char), s, eval, occs, depth + 1);
+                return check_prev(sfx + sizeof(char), s, eval, occs, depth + 1);
             } else if (occs[index] < -1){
                 // decrease minimum occurrences
                 ++(occs[index]);
-                return rec_check(sfx + sizeof(char), s, eval, occs, depth + 1);
+                return check_prev(sfx + sizeof(char), s, eval, occs, depth + 1);
                 --(occs[index]);
             } else {
                 // decrease exact occurrences
                 --(occs[index]);
-                return rec_check(sfx + sizeof(char), s, eval, occs, depth + 1);
+                return check_prev(sfx + sizeof(char), s, eval, occs, depth + 1);
                 ++(occs[index]);
             }
         }
     }
 }
 
-static int check_leaf(trie_t *trie, char *s, char *eval, int *occs, int depth){
+static int check_leaf_prev(trie_t *trie, char *s, char *eval, int *occs, int depth){
     int res, index = map_charset((trie->status)[1]);
+    int count = occs[index];
 
-    // the first letter of status is already checked by rec_prune
-    if (occs[index] == -1){
-        res = rec_check(trie->status + 2*sizeof(char), s, eval, occs, depth + 1);
-    } else if (occs[index] < -1){
+    // the first letter of status is already checked by the pruning function
+    if (count == -1){
+        res = check_prev(trie->status + 2*sizeof(char), s, eval, occs, depth + 1);
+    } else if (count < -1){
         ++(occs[index]);
-        res = rec_check(trie->status + 2*sizeof(char), s, eval, occs, depth + 1);
+        res = check_prev(trie->status + 2*sizeof(char), s, eval, occs, depth + 1);
         --(occs[index]);
     } else {
         --(occs[index]);
-        res = rec_check(trie->status + 2*sizeof(char), s, eval, occs, depth + 1);
+        res = check_prev(trie->status + 2*sizeof(char), s, eval, occs, depth + 1);
         ++(occs[index]);
     }
 
     if (res == 0) (trie->status)[0] = PRUNE;
+    if (res == 1) {
+        return res;
+    }
+
     return res;
 }
 
-static int rec_prune(trie_t *trie, char *s, char *eval, int *occs, int depth){
+static int prune_prev(trie_t *trie, char *s, char *eval, int *occs, int depth){
     trie_t *curr;
     int index, target, total = 0;
 
@@ -155,9 +239,9 @@ static int rec_prune(trie_t *trie, char *s, char *eval, int *occs, int depth){
 
     if (eval[depth] == '+'){ // prune all except target letter's node
         for (curr = trie; curr != NULL; curr = curr->next){
-            if ((curr->status)[1] == target){ // target letter found
-                if (curr->branch == NULL) total = check_leaf(curr, s, eval, occs, depth);
-                else total = rec_prune(curr->branch, s, eval, occs, depth + 1);
+            if ((curr->status)[1] == target && (curr->status)[0] == NO_PRUNE){
+                if (curr->branch == NULL) total = check_leaf_prev(curr, s, eval, occs, depth);
+                else total = prune_prev(curr->branch, s, eval, occs, depth + 1);
             } else (curr->status)[0] = PRUNE; // not target, prune
         }
 
@@ -169,17 +253,17 @@ static int rec_prune(trie_t *trie, char *s, char *eval, int *occs, int depth){
                 // if curr is target or has no occurrences left, prune it.
                 if ((curr->status)[1] == target || occs[index] == 0) (curr->status)[0] = PRUNE;
                 else {
-                    if (curr->branch == NULL) total += check_leaf(curr, s, eval, occs, depth);
+                    if (curr->branch == NULL) total += check_leaf_prev(curr, s, eval, occs, depth);
                     else { // decrement occs array (like in previous function)
                         if (occs[index] == -1){
-                            total += rec_prune(curr->branch, s, eval, occs, depth + 1);
+                            total += prune_prev(curr->branch, s, eval, occs, depth + 1);
                         } else if (occs[index] < -1){
                             ++(occs[index]);
-                            total += rec_prune(curr->branch, s, eval, occs, depth + 1);
+                            total += prune_prev(curr->branch, s, eval, occs, depth + 1);
                             --(occs[index]);
                         } else {
                             --(occs[index]);
-                            total += rec_prune(curr->branch, s, eval, occs, depth + 1);
+                            total += prune_prev(curr->branch, s, eval, occs, depth + 1);
                             ++(occs[index]);
                         }
                     }
@@ -191,211 +275,142 @@ static int rec_prune(trie_t *trie, char *s, char *eval, int *occs, int depth){
     return total;
 }
 
-int prune_trie(trie_t *trie, char *s, char *eval){
-    int occs[CHARSET];
+void handle_simple_guess(trie_t *trie, int wordsize, char *ref, char *s, req_t *reqs){
+    char *eval;
+    int occs[CHARSET], count;
 
-    calculate_occs(s, eval, occs);
-    return rec_prune(trie, s, eval, occs, 0);
+    if (strcmp(ref, s) == 0) puts("ok");
+    else if (search(trie, s) == 0) puts("not_exists");
+    else{
+        eval = analyze_guess(ref, s, wordsize, occs, reqs);
+        count = prune_prev(trie, s, eval, occs, 0);
+
+        printf("%d\n", count);
+        free(eval);
+    }
 }
 
 
-// static void generate_req(req_ptr reqs, int wordsize){
-//     char *matches;
-//     uint8_t *p;
-//     int i, j;
+static int check_full(char *sfx, req_t *reqs, int depth){
+    int i, index;
 
-//     matches = (char *)malloc((wordsize + 1) * sizeof(char));
-//     for (i = 0; i < wordsize; ++i) matches[i] = '*';
-//     matches[wordsize] = '\0';
-//     reqs->match = matches;
+    // once we run out of suffix, check that all occs are either -1 or 0
+    if (sfx[0] == '\0'){
+        for (i = 0; i < CHARSET; ++i){
+            if ((reqs->occs)[i] != 0 && (reqs->occs)[i] != -1) return 0;
+        }
+        return 1;
+    }
 
-//     for (i = 0; i < CHARSET; ++i) {
-//         p = (uint8_t *)malloc((wordsize) * sizeof(uint8_t));
-//         for (j = 0; j < wordsize; ++j) p[j] = 1;
+    if ((reqs->match)[depth] != '*'){ // in case of exact match
+        if (sfx[0] == (reqs->match)[depth]) {
+            return check_full(sfx + sizeof(char), reqs, depth + 1);
+        } else return 0;
 
-//         reqs->pos[i] = p;        
-//         reqs->occ[i] = -1;
-//     }
-// }
+    } else { // inexact match
+        index = map_charset(sfx[0]);
 
+        if ((reqs->pos)[index][depth] == 0 || // position unavailable for char
+            (reqs->occs)[index] == 0          // char does not appear
+        ) return 0;
 
-// static void calculate_req(char *s, char *eval, req_ptr reqs){
-//     int8_t counts[CHARSET]; // treated the same as reqs->occ
-//     char c;
-//     int i, index;
+        else {
+            if ((reqs->occs)[index] == -1){
+                return check_full(sfx + sizeof(char), reqs, depth + 1);
+            } else if ((reqs->occs)[index] < -1){
+                ++((reqs->occs)[index]);
+                return check_full(sfx + sizeof(char), reqs, depth + 1);
+                --((reqs->occs)[index]);
+            } else {
+                --((reqs->occs)[index]);
+                return check_full(sfx + sizeof(char), reqs, depth + 1);
+                ++((reqs->occs)[index]);
+            }
+        }
+    }
+}
 
-//     for (i = 0; i < CHARSET; ++i) counts[i] = -1;
+static int check_leaf_full(trie_t *trie, req_t *reqs, int depth){
+    int res, index = map_charset((trie->status)[1]);
+    int count = (reqs->occs)[index];
 
-//     for (i = 0; s[i] != '\0'; ++i){
-//         c = eval[i];
-//         index = map_charset(s[i]);
+    // the first letter of status is already checked by the pruning function
+    if (count == -1){
+        res = check_full(trie->status + 2*sizeof(char), reqs, depth + 1);
+    } else if (count < -1){
+        ++((reqs->occs)[index]);
+        res = check_full(trie->status + 2*sizeof(char), reqs, depth + 1);
+        --((reqs->occs)[index]);
+    } else {
+        --((reqs->occs)[index]);
+        res = check_full(trie->status + 2*sizeof(char), reqs, depth + 1);
+        ++((reqs->occs)[index]);
+    }
 
-//         if (c == '+'){ // when matching, raise bounds
-//             reqs->match[i] = s[i];
-//             if (counts[index] < 0) --(counts[index]);
-//             else ++(counts[index]);
-//         } else if (c == '|'){ // c is somewhere else
-//             if (counts[index] < 0) --(counts[index]);
-//             reqs->pos[index][i] = 0;
-//         } else if (c == '/'){ // c cannot be placed anywhere
-//             if (counts[index] < 0) {
-//                 counts[index] = -(counts[index]) - 1;
-//                 reqs->pos[index][i] = 0;
-//             }
-//         }
-//     }
+    if (res == 0) (trie->status)[0] = PRUNE;
+    return res;
+}
 
-//     // evaluate compatibility of new bounds with previous ones
-//     for (i = 0; i < CHARSET; ++i){
-//         if (reqs->occ[i] < 0 &&
-//             (counts[i] >= 0 || counts[i] < reqs->occ[i])
-//         ) reqs->occ[i] = counts[i];
-//     }
-// }
+static int prune_full(trie_t *trie, req_t *reqs, int depth){
+    trie_t *curr;
+    int index, target, total = 0;
 
+    target = (reqs->match)[depth];
 
-// static uint8_t check_req(char *s, req_ptr reqs){
-//     int16_t counts[CHARSET] = {0};
-//     int i, index, occs;
+    if (target != '*'){ // prune all except target letter's node
+        for (curr = trie; curr != NULL; curr = curr->next){
+            if ((curr->status)[1] == target && (curr->status)[0] == NO_PRUNE){
+                if (curr->branch == NULL) total = check_leaf_full(curr, reqs, depth);
+                else total = prune_full(curr->branch, reqs, depth + 1);
+            } else (curr->status)[0] = PRUNE; // not target, prune
+        }
 
-//     for (i = 0; s[i] != '\0'; ++i){
-//         index = map_charset(s[i]);
-//         if ((reqs->match[i] != '*' && s[i] != reqs->match[i]) || // not the matched letter
-//             reqs->pos[index][i] == 0 || // position is not correct for the letter
-//             reqs->occ[index] == 0 // letter does not appear in ref
-//         ) return 0;
-//         ++(counts[index]);
-//     }
+    } else {
+        for (curr = trie; curr != NULL; curr = curr->next){
+            if ((curr->status)[0] == NO_PRUNE){ // don't consider pruned nodes
+                index = map_charset((curr->status)[1]);
 
-//     for (i = 0; i < CHARSET; ++i){
-//         occs = reqs->occ[i];
-//         if ((occs >  0  && counts[i] !=  occs) ||    // not exact amount
-//             (occs < -1  && counts[i]  < (-occs - 1)) // less than minimum amount
-//         ) return 0;
-//     }
+                // if curr is target or has no occurrences left, prune it.
+                if ((reqs->pos)[index][depth] == 0 || // position is unavailable
+                    (reqs->occs)[index] == 0          // letter does not appear
+                ) (curr->status)[0] = PRUNE;
+                else {
+                    if (curr->branch == NULL) total += check_leaf_full(curr, reqs, depth);
+                    else {
+                        if ((reqs->occs)[index] == -1){
+                            total += prune_full(curr->branch, reqs, depth + 1);
+                        } else if ((reqs->occs)[index] < -1){
+                            ++((reqs->occs)[index]);
+                            total += prune_full(curr->branch, reqs, depth + 1);
+                            --((reqs->occs)[index]);
+                        } else {
+                            --((reqs->occs)[index]);
+                            total += prune_full(curr->branch, reqs, depth + 1);
+                            ++((reqs->occs)[index]);
+                        }
+                    }
+                }
+            }
+        }
+    }
 
-//     return 1;
-// }
+    return total;
+}
 
+void handle_full_guess(trie_t *trie, int wordsize, char *ref, char *s, req_t *reqs){
+    char *eval;
+    int occs[CHARSET], count;
 
-// static void filter_req(dict_ptr D, req_ptr reqs){
-//     node_ptr curr, prev, temp;
+    if (strcmp(ref, s) == 0) puts("ok");
+    else if (search(trie, s) == 0) puts("not_exists");
+    else{
+        eval = analyze_guess(ref, s, wordsize, occs, reqs);
+        count = prune_full(trie, reqs, 0);
 
-//     curr = D->head;
-//     prev = NULL;
-//     while (curr != NULL){
-//         if (check_req(curr->word, reqs) == 0){ // doesn't match requirements
-//             if (prev != NULL) prev->next = curr->next;
-//             else D->head = curr->next;
-//             temp = curr;
-//             curr = curr->next;
-
-//             temp->next = NULL;
-//             --(D->len);
-//         } else{
-//             prev = curr;
-//             curr = curr->next;
-//         }
-//     }
-// }
-
-
-// static void free_req(req_ptr reqs){
-//     int i;
-    
-//     free(reqs->match);
-//     for(i = 0; i < CHARSET; ++i) free(reqs->pos[i]);
-//     free(reqs);
-// }
-
-
-// static void create_list(dict_ptr D, req_ptr reqs){
-//     node_ptr *list_buffer = (node_ptr *)malloc(D->items * sizeof(node_ptr));
-//     node_ptr curr;
-//     int i, j, count = 0;
-
-//     // parse table and add all items matching requirements to buffer
-//     for (i = 0, j = 0; j < D->items; ++i){
-//         curr = D->table[i];
-//         while (curr != NULL){
-//             if (check_req(curr->word, reqs) == 1){
-//                 list_buffer[count] = curr;
-//                 ++count;
-//             }
-//             curr = curr->chain;
-//             ++j;
-//         }
-//     }
-
-//     // sort buffer
-//     quicksort(list_buffer, list_buffer + count - 1);
-    
-//     // link buffer elements into list
-//     curr = list_buffer[0];
-//     for (i = 1; i < count; ++i){
-//         curr->next = list_buffer[i];
-//         curr = curr->next;
-//     }
-
-//     D->head = list_buffer[0];
-//     D->len = count;
-//     free(list_buffer);
-// }
-
-// static void check_guess(dict_ptr D, char *ref, char *s, int wordsize, req_ptr reqs, FILE *output){
-//     char *eval;
-
-//     // checking guesses is O(l*m), but l is rapidly decreasing
-//     eval = calculate_eval(ref, s, wordsize); // O(2m + 64)   m = wordsize
-//     calculate_req(s, eval, reqs);            // O(m + 128)
-
-//     if (D->head == NULL) create_list(D, reqs);
-//     else filter_req(D, reqs);                // O(l * (m + 64)) l = L->len
-
-//     fputs(eval, output);
-//     fputs("\n",output);
-//     fprintf(output, "%d\n", D->len);
-//     free(eval); 
-// }
-
-// /*
-// Inserts all new words into the table. Words that fall within the requirements are
-// buffered in a dynamically reallocated array which gets sorted, and are then
-// inserted sequentially into the list.
-// */
-// static void handle_insert(dict_ptr D, int wordsize, req_ptr reqs, FILE *input){
-//     node_ptr *list_buffer = (node_ptr *)malloc(BUFSIZE * sizeof(node_ptr));
-//     node_ptr new;
-//     char *buff = (char *)malloc((wordsize + 1) * sizeof(char));
-//     int i = 0, j = 1;
-
-//     // don't add to list if it hasn't been created yet
-//     if (D->head == NULL) reqs = NULL;
-    
-//     safe_fgets(buff, wordsize, input);
-//     while(buff[0] != '+'){ // +inserisci_fine
-//         new = insert(D, buff);
-//         if (reqs != NULL && check_req(buff, reqs) == 1) {
-//             list_buffer[i] = new;
-//             ++i;
-//             if (i / BUFSIZE == j){ // when multiple of BUFSIZE, realloc
-//                 ++j;
-//                 list_buffer = (node_ptr *)realloc(list_buffer, j * BUFSIZE * sizeof(node_ptr));
-//             }
-//         }
-
-//         fgetc(input);
-//         buff = (char *)malloc((wordsize + 1) * sizeof(char));
-//         safe_fgets(buff, wordsize, input);
-//     }
-//     if (wordsize <= 15) while (fgetc(input) != '\n');
-
-//     quicksort(list_buffer, list_buffer + i - 1);
-//     sequential_insert(D, list_buffer, i);
-
-//     free(list_buffer);
-//     free(buff);
-// }
+        printf("%d\n", count);
+        free(eval);
+    }
+}
 
 
 trie_t *initial_read(trie_t *trie, int wordsize){

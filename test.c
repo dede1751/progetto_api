@@ -1,17 +1,53 @@
-#include "trie.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <string.h>
 
-static trie_t *generate_branch(char);
+#define CHARSET 64
+#define PRUNE 1
+#define NO_PRUNE 0
 
-static trie_t *get_child(trie_t *, char);
-static trie_t *add_child(trie_t *, char *);
-static trie_t *insert_leaf(trie_t *, char *, char);
-static void split_leaves(trie_t *, char *);
-
-static void print(trie_t *, char *, int);
-
+typedef struct trie {
+    struct trie *next;
+    struct trie *branch;
+    char *status;
+} trie_t;
 
 
-static trie_t *generate_branch(char c){
+// needed for errorless compilation
+void safe_fgets(char *, int);
+void safe_scanf(int *);
+
+trie_t *generate_branch(char);
+
+trie_t *get_child(trie_t *, char);
+trie_t *add_child(trie_t *, char *);
+trie_t *insert(trie_t *, char *);
+trie_t *insert_leaf(trie_t *, char *, char);
+void split_leaves(trie_t *, char *);
+
+trie_t *initial_read(trie_t *, int);
+
+int main(){
+    trie_t *trie = NULL;
+    int wordsize;
+
+    safe_scanf(&wordsize);
+
+    trie = initial_read(trie, wordsize);
+
+    exit(EXIT_SUCCESS);
+}
+
+void safe_fgets(char *s, int size){
+    if (fgets(s, size + 1, stdin) == NULL) exit(EXIT_FAILURE);
+}
+void safe_scanf(int *x){
+    if (scanf("%d\n", x) == 0) exit(EXIT_FAILURE);
+}
+
+
+trie_t *generate_branch(char c){
     trie_t *new = (trie_t *)malloc(sizeof(trie_t));
     char *status = (char *)malloc(2*sizeof(char));
 
@@ -24,7 +60,7 @@ static trie_t *generate_branch(char c){
     return new;
 }
 
-static trie_t *get_child(trie_t *trie, char tgt){
+trie_t *get_child(trie_t *trie, char tgt){
     int c;
 
     for (; trie != NULL; trie = trie->next){
@@ -35,7 +71,7 @@ static trie_t *get_child(trie_t *trie, char tgt){
     return NULL;
 }
 
-static trie_t *add_child(trie_t *trie, char *status){
+trie_t *add_child(trie_t *trie, char *status){
     trie_t *prev = NULL, *curr = trie, *new = (trie_t *)malloc(sizeof(trie_t));
     char tgt = status[1];
 
@@ -57,7 +93,7 @@ static trie_t *add_child(trie_t *trie, char *status){
     }
 }
 
-static trie_t *insert_leaf(trie_t *trie, char *word, char p){
+trie_t *insert_leaf(trie_t *trie, char *word, char p){
     int len = strlen(word);
     char *status = (char *)malloc((len + 2)*sizeof(char));
 
@@ -68,7 +104,7 @@ static trie_t *insert_leaf(trie_t *trie, char *word, char p){
     return add_child(trie, status);
 }
 
-static void split_leaves(trie_t *trie, char *word){
+void split_leaves(trie_t *trie, char *word){
     trie_t *tmp_trie = trie;
     char *tmp_sts = trie->status, *sfx = trie->status + 2*sizeof(char);
 
@@ -106,53 +142,34 @@ trie_t *insert(trie_t *root, char *word){
     return root;
 }
 
+trie_t *initial_read(trie_t *trie, int wordsize){
+    char *buff = (char *) malloc((wordsize + 1) * sizeof(char));
 
-int search(trie_t *root, char *word){
-    root = get_child(root, word[0]);
+    safe_fgets(buff, wordsize);
+    while (buff[0] != '+'){
+        trie = insert(trie, buff);
 
-    // descend down branch until leaf or NULL
-    while (root != NULL && root->branch != NULL){
-        word += sizeof(char);
-        root = get_child(root->branch, word[0]);
+        getchar(); //trailing \n
+        safe_fgets(buff, wordsize);
     }
 
-    if (root == NULL) return 0;
-    else { // check that the suffix matches the rest of the word
-        if (strcmp((root->status) + sizeof(char), word) == 0) return 1;
-        else return 0;
-    }
-}
+    if (buff[1] == 'n'){    // +nuova_partita
+        if (wordsize <= 14) while (getchar() != '\n');
+    } else {                // +inserisci_inizio
+        if (wordsize <= 17) while (getchar() != '\n');
 
+        safe_fgets(buff, wordsize);
+        while (buff[0] != '+'){
+            trie = insert(trie, buff);
 
-static void print(trie_t *trie, char *word, int depth){
-
-    while (trie != NULL){
-        if ((trie->status)[0] == NO_PRUNE){
-            if (trie->branch == NULL) {
-                fputs(word, stdout); //omit newline
-                puts((trie->status) + sizeof(char)); // always at least one letter
-            } else {
-                word[depth] = (trie->status)[1];
-                print(trie->branch, word, depth + 1);
-                word[depth] = '\0';
-            }
+            getchar(); //trailing \n
+            safe_fgets(buff, wordsize);
         }
-        trie = trie->next;
+        // dump remaining of +inserisci_fine, dump +nuova_partita
+        if (wordsize <= 15) while (getchar() != '\n');
+        while(getchar() != '\n');
     }
-}
+    free(buff);
 
-void print_trie(trie_t *trie, int wordsize){
-    char *word = (char *) calloc(wordsize + 1, sizeof(char));
-
-    print(trie, word, 0);
-    free(word);
-}
-
-
-void clear_trie(trie_t *trie){
-
-    if (trie->next != NULL) clear_trie(trie->next);
-    if (trie->branch != NULL) clear_trie(trie->branch);
-
-    (trie->status)[0] = NO_PRUNE;
+    return trie;
 }

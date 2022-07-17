@@ -66,7 +66,6 @@ trie_t *insert(trie_t *, char *);
 int search(trie_t *, char *);
 
 void print_trie(trie_t *, int);
-int count_trie(trie_t *);
-void free_trie(trie_t *);
+void clear_trie(trie_t *);
 
 #endif
