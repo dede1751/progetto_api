@@ -1,29 +1,82 @@
-#include "game.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <string.h>
 
-static void safe_fgets(char *, int);
-static int map_charset(char);
-
-static req_t *generate_reqs(int);
-static void free_req(req_t *);
-
-static void calculate_occs(char *, char *, int *);
-static char *analyze_guess(char *, char *, int , int *, req_t *);
-
-static int check_prev(char *, char *, char *, int *, int);
-static int check_leaf_prev(trie_t *, char *, char *, int *, int);
-static int prune_prev(trie_t *, char *, char *, int *, int);
-static void handle_simple_guess(trie_t *, int, char *, char *, req_t *);
-
-static int check_full(char *, req_t *, int);
-static int check_leaf_full(trie_t *, req_t *, int);
-static int prune_full(trie_t *, req_t *, int);
-static void handle_full_guess(trie_t *, int, char *, char *, req_t *);
-
-static trie_t *handle_insert(trie_t *, int);
+#define CHARSET 64
+#define PRUNE 1
+#define NO_PRUNE 0
 
 
+typedef struct trie {
+    struct trie *next;
+    struct trie *branch;
+    char *status;
+} trie_t;
 
-static void safe_fgets(char *s, int size){
+typedef struct reqs {
+    char *match;
+    int8_t occs[CHARSET];
+    uint8_t *pos[CHARSET];
+} req_t;
+
+void safe_scanf(int *);
+void safe_fgets(char *, int);
+int map_charset(char);
+
+trie_t *generate_branch(char);
+trie_t *get_child(trie_t *, char);
+trie_t *add_child(trie_t *, char *);
+trie_t *insert_leaf(trie_t *, char *, char);
+void split_leaves(trie_t *, char *);
+trie_t *insert(trie_t *, char *);
+
+int search(trie_t *, char *);
+
+void print(trie_t *, char *, int);
+void print_trie(trie_t *, int);
+void clear_trie(trie_t *);
+
+req_t *generate_reqs(int);
+void free_req(req_t *);
+
+void calculate_occs(char *, char *, int *);
+char *analyze_guess(char *, char *, int , int *, req_t *);
+
+int check_prev(char *, char *, char *, int *, int);
+int check_leaf_prev(trie_t *, char *, char *, int *, int);
+int prune_prev(trie_t *, char *, char *, int *, int);
+void handle_simple_guess(trie_t *, int, char *, char *, req_t *);
+
+int check_full(char *, req_t *, int);
+int check_leaf_full(trie_t *, req_t *, int);
+int prune_full(trie_t *, req_t *, int);
+void handle_full_guess(trie_t *, int, char *, char *, req_t *);
+
+trie_t *handle_insert(trie_t *, int);
+
+trie_t *initial_read(trie_t *, int);
+trie_t *new_game(trie_t *, int);
+
+
+
+int main(){
+    trie_t *trie = NULL;
+    int wordsize;
+
+    safe_scanf(&wordsize);
+
+    trie = initial_read(trie, wordsize);
+
+    do {
+        trie = new_game(trie, wordsize);
+    } while (trie != NULL);
+
+    exit(EXIT_SUCCESS);
+}
+
+
+void safe_fgets(char *s, int size){
     if (fgets(s, size + 1, stdin) == NULL) exit(EXIT_FAILURE);
 }
 void safe_scanf(int *x){
@@ -31,7 +84,7 @@ void safe_scanf(int *x){
 }
 
 
-static int map_charset(char c){
+int map_charset(char c){
     if (c == '-') return 0;
     else if (c >= '0' && c <= '9') return (c - 47);
     else if (c >= 'A' && c <= 'Z') return (c - 54);
@@ -40,7 +93,154 @@ static int map_charset(char c){
 }
 
 
-static req_t *generate_reqs(int wordsize){
+trie_t *generate_branch(char c){
+    trie_t *new = (trie_t *)malloc(sizeof(trie_t));
+    char *status = (char *)malloc(2*sizeof(char));
+
+    new->next = NULL;
+    new->branch = NULL;
+    status[0] = NO_PRUNE;
+    status[1] = c;
+    new->status = status;
+
+    return new;
+}
+
+trie_t *get_child(trie_t *trie, char tgt){
+    int c;
+
+    for (; trie != NULL; trie = trie->next){
+        c = (trie->status)[1];
+        if (c > tgt) return NULL;
+        else if (c == tgt) return trie;
+    }
+    return NULL;
+}
+
+trie_t *add_child(trie_t *trie, char *status){
+    trie_t *prev = NULL, *curr = trie, *new = (trie_t *)malloc(sizeof(trie_t));
+    char tgt = status[1];
+
+    // find correct spot
+    while (curr != NULL && ((curr->status)[1] < tgt)){
+        prev = curr;
+        curr = curr->next;
+    }
+
+    // add new trie node, return head of the list
+    new->next = curr;
+    new->branch = NULL;
+    new->status = status;
+
+    if (prev == NULL) return new;
+    else {
+        prev->next = new;
+        return trie;
+    }
+}
+
+trie_t *insert_leaf(trie_t *trie, char *word, char p){
+    int len = strlen(word);
+    char *status = (char *)malloc((len + 2)*sizeof(char));
+
+    // add prune and copy whole word, so status[1] is word[0] hence the index
+    status[0] = p;
+    memcpy(status + sizeof(char), word, (len + 1)*sizeof(char));
+
+    return add_child(trie, status);
+}
+
+void split_leaves(trie_t *trie, char *word){
+    trie_t *tmp_trie = trie;
+    char *tmp_sts = trie->status, *sfx = trie->status + 2*sizeof(char);
+
+    // navigate down as long as word and sfx are the same
+    for (; *sfx == *word; sfx += sizeof(char), word += sizeof(char)){
+        trie->branch = generate_branch(word[0]);
+        trie = trie->branch;
+    }
+
+    // at some point they must differ, add them as leaves to trie->branch.
+    trie->branch = insert_leaf(NULL, word, NO_PRUNE);
+    trie->branch = insert_leaf(trie->branch, sfx, tmp_sts[0]);
+
+    // reallocate initial leaf to be unpruned branch (only 2 chars in status)
+    tmp_sts[0] = NO_PRUNE;
+    tmp_trie->status = realloc(tmp_sts, 2*sizeof(char));
+}
+
+trie_t *insert(trie_t *root, char *word){
+    trie_t *child = get_child(root, word[0]), *trie = root, *prev_branch = NULL;
+
+    // iterate down as long as child is found and it's a branch
+    while(child != NULL && child->branch != NULL){
+        prev_branch = child;
+        trie = child->branch;
+    
+        word += sizeof(char);
+        child = get_child(trie, word[0]);
+    }
+
+    if (child == NULL) {
+        if (prev_branch == NULL) return insert_leaf(trie, word, NO_PRUNE); // root might change
+        else prev_branch->branch = insert_leaf(trie, word, NO_PRUNE);      // root won't change
+    } else split_leaves(child, word + sizeof(char)); // doesn't affect root
+    return root;
+}
+
+
+int search(trie_t *root, char *word){
+    root = get_child(root, word[0]);
+
+    // descend down branch until leaf or NULL
+    while (root != NULL && root->branch != NULL){
+        word += sizeof(char);
+        root = get_child(root->branch, word[0]);
+    }
+
+    if (root == NULL) return 0;
+    else { // check that the suffix matches the rest of the word
+        if (strcmp((root->status) + sizeof(char), word) == 0) return 1;
+        else return 0;
+    }
+}
+
+
+void print(trie_t *trie, char *word, int depth){
+
+    while (trie != NULL){
+        if ((trie->status)[0] == NO_PRUNE){
+            if (trie->branch == NULL) {
+                fputs(word, stdout); //omit newline
+                puts((trie->status) + sizeof(char)); // always at least one letter
+            } else {
+                word[depth] = (trie->status)[1];
+                print(trie->branch, word, depth + 1);
+                word[depth] = '\0';
+            }
+        }
+        trie = trie->next;
+    }
+}
+
+void print_trie(trie_t *trie, int wordsize){
+    char *word = (char *) calloc(wordsize + 1, sizeof(char));
+
+    print(trie, word, 0);
+    free(word);
+}
+
+
+void clear_trie(trie_t *trie){
+
+    if (trie->next != NULL) clear_trie(trie->next);
+    if (trie->branch != NULL) clear_trie(trie->branch);
+
+    (trie->status)[0] = NO_PRUNE;
+}
+
+
+req_t *generate_reqs(int wordsize){
     req_t *reqs = (req_t *) malloc(sizeof(req_t));
     char *matches;
     uint8_t *p;
@@ -63,7 +263,7 @@ static req_t *generate_reqs(int wordsize){
 }
 
 
-static void free_req(req_t *reqs){
+void free_req(req_t *reqs){
     int i;
     
     free(reqs->match);
@@ -72,7 +272,7 @@ static void free_req(req_t *reqs){
 }
 
 
-static void calculate_occs(char *s, char *eval, int *occs){
+void calculate_occs(char *s, char *eval, int *occs){
     int i, index;
 
     // set all occs to -1 (unbound)
@@ -92,28 +292,7 @@ static void calculate_occs(char *s, char *eval, int *occs){
 }
 
 
-/** @brief Prints evaluation and modifies requirements accordingly
- *
- *  Handles both evaluation and the requirements struct:
- *  evaluation is done by counting occurrences in the ref string and then, for
- *  each character in the s string, choosing '\' or '|' based on occurrences
- *  left. It then prints the eval string.
- * 
- *  Requirements calculation happens in multiple stages:
- *      - matching characters are flagged on the first pass of ref
- *      - impossible positions happen whenever eval is '|' or '/', so they are
- *        computed on the second pass on s
- *      - finally we use the eval string to compute occurrence bounds, and apply
- *        those to the requirements struct where needed.
- * 
- * @param ref       The reference string.
- * @param s         The guess string.
- * @param wordsize  Length of the strings.
- * @param occs      int[64] array, passed to use later for pruning.
- * @param reqs      Pointer to the requirements struct.
- * @return Void.
- */
-static char *analyze_guess(char *ref, char *s, int wordsize, int *occs, req_t *reqs){
+char *analyze_guess(char *ref, char *s, int wordsize, int *occs, req_t *reqs){
     char *eval = (char *)calloc(wordsize + 1, sizeof(char));
     uint8_t counts[CHARSET] = {0};
     int i, index;
@@ -159,7 +338,7 @@ static char *analyze_guess(char *ref, char *s, int wordsize, int *occs, req_t *r
     return eval;
 }
 
-static int check_prev(char *sfx, char *s, char *eval, int *occs, int depth){
+int check_prev(char *sfx, char *s, char *eval, int *occs, int depth){
     int i, index, count, res;
 
     // once we run out of suffix, check that all occs are either -1 or 0
@@ -194,7 +373,7 @@ static int check_prev(char *sfx, char *s, char *eval, int *occs, int depth){
     return res;
 }
 
-static int check_leaf_prev(trie_t *trie, char *s, char *eval, int *occs, int depth){
+int check_leaf_prev(trie_t *trie, char *s, char *eval, int *occs, int depth){
     int res, index = map_charset((trie->status)[1]);
     int count = occs[index];
 
@@ -217,7 +396,7 @@ static int check_leaf_prev(trie_t *trie, char *s, char *eval, int *occs, int dep
 }
 
 
-static int prune_prev(trie_t *trie, char *s, char *eval, int *occs, int depth){
+int prune_prev(trie_t *trie, char *s, char *eval, int *occs, int depth){
     trie_t *curr;
     int index, count, total = 0;
     char target;
@@ -258,7 +437,7 @@ static int prune_prev(trie_t *trie, char *s, char *eval, int *occs, int depth){
     return total; 
 }
 
-static void handle_simple_guess(trie_t *trie, int wordsize, char *ref, char *s, req_t *reqs){
+void handle_simple_guess(trie_t *trie, int wordsize, char *ref, char *s, req_t *reqs){
     char *eval;
     int occs[CHARSET], count;
 
@@ -273,7 +452,7 @@ static void handle_simple_guess(trie_t *trie, int wordsize, char *ref, char *s, 
 }
 
 
-static int check_full(char *sfx, req_t *reqs, int depth){
+int check_full(char *sfx, req_t *reqs, int depth){
     int i, index, count, res;
 
     // once we run out of suffix, check that all occs are either -1 or 0
@@ -307,7 +486,7 @@ static int check_full(char *sfx, req_t *reqs, int depth){
     return res;
 }
 
-static int check_leaf_full(trie_t *trie, req_t *reqs, int depth){
+int check_leaf_full(trie_t *trie, req_t *reqs, int depth){
     int res, index = map_charset((trie->status)[1]);
     int count = (reqs->occs)[index];
 
@@ -328,7 +507,7 @@ static int check_leaf_full(trie_t *trie, req_t *reqs, int depth){
     return res;
 }
 
-static int prune_full(trie_t *trie, req_t *reqs, int depth){
+int prune_full(trie_t *trie, req_t *reqs, int depth){
     trie_t *curr;
     int index, count, total = 0;
     char target;
@@ -367,7 +546,7 @@ static int prune_full(trie_t *trie, req_t *reqs, int depth){
     return total; 
 }
 
-static void handle_full_guess(trie_t *trie, int wordsize, char *ref, char *s, req_t *reqs){
+void handle_full_guess(trie_t *trie, int wordsize, char *ref, char *s, req_t *reqs){
     char *eval;
     int occs[CHARSET], count;
 
@@ -414,7 +593,7 @@ trie_t *initial_read(trie_t *trie, int wordsize){
 }
 
 
-static trie_t *handle_insert(trie_t *trie, int wordsize){
+trie_t *handle_insert(trie_t *trie, int wordsize){
     char buff[wordsize + 1];
 
     safe_fgets(buff, wordsize);

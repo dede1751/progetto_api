@@ -8,9 +8,7 @@
 
 #define CHARSET 64
 #define PRUNE 1
-#define NO_PRUNE 2
-#define MAX(x, y) (((x) > (y)) ? (x) : (y))
-#define MIN(x, y) (((x) < (y)) ? (x) : (y))
+#define NO_PRUNE 0
 
 
 /*

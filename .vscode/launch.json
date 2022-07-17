@@ -5,7 +5,7 @@
         "type": "cppdbg",
         "request": "launch",
         "program": "${workspaceFolder}/debug/build",
-        "args": ["<", "${workspaceFolder}/dum_e/upto18.txt"],
+        "args": ["<", "${workspaceFolder}/dum_e/test3.txt"],
         "stopAtEntry": true,
         "cwd": "${fileDirname}",
         "environment": [],

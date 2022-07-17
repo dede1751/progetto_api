@@ -6,7 +6,7 @@
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Sat Jul 16 23:56:19 2022
+# Make data base, printed on Sun Jul 17 12:53:39 2022
 
 # Variables
 
@@ -17,7 +17,7 @@ LC_ALL = C
 # environment
 NO_AT_BRIDGE = 1
 # environment
-I3SOCK = /run/user/1000/i3/ipc-socket.621
+I3SOCK = /run/user/1000/i3/ipc-socket.610
 # environment
 LC_NAME = en_US.UTF-8
 # environment
@@ -25,7 +25,7 @@ LC_NUMERIC = en_US.UTF-8
 # environment
 VSCODE_CWD = /home/andrea
 # environment
-WINDOWID = 39845890
+WINDOWID = 29360130
 # makefile (from 'makefile', line 17)
 DBGDIR = debug
 # environment
@@ -57,7 +57,7 @@ DBGEXE = $(DBGDIR)/$(EXE)
 # automatic
 %F = $(notdir $%)
 # environment
-ALACRITTY_SOCKET = /run/user/1000/Alacritty-:0-897.sock
+ALACRITTY_SOCKET = /run/user/1000/Alacritty-:0-800.sock
 # environment
 VSCODE_CODE_CACHE_PATH = /home/andrea/.config/Code/CachedData/92d25e35d9bf1a6b16f7d0758f25d48ace11e5b9
 # environment
@@ -97,7 +97,7 @@ MAKEFILE_LIST := makefile
 # makefile (from 'makefile', line 27)
 RELOBJS = $(addprefix $(RELDIR)/, $(OBJS))
 # environment
-VSCODE_PID = 1114
+VSCODE_PID = 1017
 # environment
 XDG_SESSION_TYPE = x11
 # automatic
@@ -153,7 +153,7 @@ XDG_SEAT = seat0
 # environment
 XDG_CURRENT_DESKTOP = i3
 # environment
-ALACRITTY_LOG = /tmp/Alacritty-897.log
+ALACRITTY_LOG = /tmp/Alacritty-800.log
 # environment
 LS_COLORS = 
 # automatic
@@ -245,9 +245,9 @@ LC_IDENTIFICATION = en_US.UTF-8
 
 # Directories
 
-# . (device 66309, inode 786735): 16 files, no impossibilities.
+# . (device 66309, inode 786735): 17 files, no impossibilities.
 
-# 16 files, no impossibilities in 1 directories.
+# 17 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -279,8 +279,8 @@ release/trie.o:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
-
  
+
 clean:
 #  Phony target (prerequisite of .PHONY).
 #  Implicit rule search has not been done.
@@ -409,12 +409,12 @@ release/main.o:
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 36 / storage = 321 B / avg = 8 B
-# current buf: size = 8162 B / used = 321 B / count = 36 / avg = 8 B
+# strcache buffers: 1 (0) / strings = 37 / storage = 328 B / avg = 8 B
+# current buf: size = 8162 B / used = 328 B / count = 37 / avg = 8 B
 
-# strcache performance: lookups = 67 / hit rate = 46%
+# strcache performance: lookups = 68 / hit rate = 45%
 # hash-table stats:
-# Load=36/8192=0%, Rehash=0, Collisions=0/67=0%
-# Finished Make data base on Sat Jul 16 23:56:19 2022
+# Load=37/8192=0%, Rehash=0, Collisions=0/68=0%
+# Finished Make data base on Sun Jul 17 12:53:39 2022
 
  

@@ -15,13 +15,20 @@
  *                        e.g. if -3 at least twice
  *        x > 0   --->    i-th char appears exactly x times.
  *        
- *    occurrences are meant as "free" occurrences, and do not include matching
- *    letters
+ *    occurrences must be counted as total occurrences. this is because of the
+ *    following situation can't be solved efficiently when counting "free" occs:
+ * 
+ *      ref = "abc"
+ *      s1  = "add" --> eval = "+//"   occs["a"] = -1
+ *      s2  = "dad" --> eval = "|//"   occs["a"] = -2
+ * 
+ *    now we would have to check the whole (reqs->match) string to see that 'a'
+ *    appears once in there and hence we don't actually have a "free" occurrence
+ *    of 'a'. this would be far too inefficient
  *
  *  - pos[char][i] = 1  char can occupy i-th position
  *    pos[char][i] = 0  char cannot occupy i-th position
  */
-
 typedef struct reqs {
     char *match;
     int8_t occs[CHARSET];
@@ -30,20 +37,9 @@ typedef struct reqs {
 
 
 // needed for errorless compilation
-void safe_fgets(char *, int);
 void safe_scanf(int *);
 
-// Maps/Inverts map on 0-63 interval according to ASCII order
-int map_charset(char);
-char unmap_charset(int);
-
-void handle_simple_guess(trie_t *, int, char *, char *, req_t *);
-void handle_full_guess(trie_t *, int, char *, char *, req_t *);
-
-void generate_req(int, req_t *);
-void free_req(req_t *);
-
 trie_t *initial_read(trie_t *, int);
-// uint8_t new_game(dict_ptr, int, FILE *, FILE *);
+trie_t *new_game(trie_t *, int);
 
 #endif
