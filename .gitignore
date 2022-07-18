@@ -1,7 +1,7 @@
 /.DS_Store
 /debug
 /release
-/test
+/tests/dump.txt
 dum_e/dump.txt
 .vscode/configurationCache.log
 .gitignore

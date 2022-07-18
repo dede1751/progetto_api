@@ -85,7 +85,7 @@ int map_charset(char c){
     else if (c >= '0' && c <= '9') return (c - 47);
     else if (c >= 'A' && c <= 'Z') return (c - 54);
     else if (c >= 'a' && c <= 'z') return (c - 59);
-    else return 37; // maps '_'
+    else return 37;
 }
 
 
@@ -117,13 +117,11 @@ trie_t *add_child(trie_t *trie, char *status){
     trie_t *prev = NULL, *curr = trie, *new = (trie_t *)malloc(sizeof(trie_t));
     char tgt = status[1];
 
-    // find correct spot
     while (curr != NULL && ((curr->status)[1] < tgt)){
         prev = curr;
         curr = curr->next;
     }
 
-    // add new trie node, return head of the list
     new->next = curr;
     new->branch = NULL;
     new->status = status;
@@ -139,7 +137,6 @@ trie_t *insert_leaf(trie_t *trie, char *word, char p){
     int len = strlen(word);
     char *status = (char *)malloc((len + 2)*sizeof(char));
 
-    // add prune and copy whole word, so status[1] is word[0] hence the index
     status[0] = p;
     memcpy(status + sizeof(char), word, (len + 1)*sizeof(char));
 
@@ -150,17 +147,14 @@ void split_leaves(trie_t *trie, char *word){
     trie_t *tmp_trie = trie;
     char *tmp_sts = trie->status, *sfx = trie->status + 2*sizeof(char);
 
-    // navigate down as long as word and sfx are the same
     for (; *sfx == *word; sfx += sizeof(char), word += sizeof(char)){
         trie->branch = generate_branch(word[0]);
         trie = trie->branch;
     }
 
-    // at some point they must differ, add them as leaves to trie->branch.
     trie->branch = insert_leaf(NULL, word, NO_PRUNE);
     trie->branch = insert_leaf(trie->branch, sfx, tmp_sts[0]);
 
-    // reallocate initial leaf to be unpruned branch (only 2 chars in status)
     tmp_sts[0] = NO_PRUNE;
     tmp_trie->status = realloc(tmp_sts, 2*sizeof(char));
 }
@@ -168,7 +162,6 @@ void split_leaves(trie_t *trie, char *word){
 trie_t *insert(trie_t *root, char *word){
     trie_t *child = get_child(root, word[0]), *trie = root, *prev_branch = NULL;
 
-    // iterate down as long as child is found and it's a branch
     while(child != NULL && child->branch != NULL){
         prev_branch = child;
         trie = child->branch;
@@ -178,9 +171,9 @@ trie_t *insert(trie_t *root, char *word){
     }
 
     if (child == NULL) {
-        if (prev_branch == NULL) return insert_leaf(trie, word, NO_PRUNE); // root might change
-        else prev_branch->branch = insert_leaf(trie, word, NO_PRUNE);      // root won't change
-    } else split_leaves(child, word + sizeof(char)); // doesn't affect root
+        if (prev_branch == NULL) return insert_leaf(trie, word, NO_PRUNE);
+        else prev_branch->branch = insert_leaf(trie, word, NO_PRUNE);
+    } else split_leaves(child, word + sizeof(char));
     return root;
 }
 
@@ -188,14 +181,13 @@ trie_t *insert(trie_t *root, char *word){
 int search(trie_t *root, char *word){
     root = get_child(root, word[0]);
 
-    // descend down branch until leaf or NULL
     while (root != NULL && root->branch != NULL){
         word += sizeof(char);
         root = get_child(root->branch, word[0]);
     }
 
     if (root == NULL) return 0;
-    else { // check that the suffix matches the rest of the word
+    else {
         if (strcmp((root->status) + sizeof(char), word) == 0) return 1;
         else return 0;
     }
@@ -207,8 +199,8 @@ void print(trie_t *trie, char *word, int depth){
     while (trie != NULL){
         if ((trie->status)[0] == NO_PRUNE){
             if (trie->branch == NULL) {
-                fputs(word, stdout); //omit newline
-                puts((trie->status) + sizeof(char)); // always at least one letter
+                fputs(word, stdout);
+                puts((trie->status) + sizeof(char));
             } else {
                 word[depth] = (trie->status)[1];
                 print(trie->branch, word, depth + 1);
@@ -234,7 +226,6 @@ void clear_trie(trie_t *trie){
 
     (trie->status)[0] = NO_PRUNE;
 }
-
 
 
 req_t *generate_reqs(int wordsize){
@@ -272,32 +263,29 @@ void free_req(req_t *reqs){
 void calculate_occs(char *s, char *eval, int *occs){
     int i, index;
 
-    // set all occs to -1 (unbound)
     for (i = 0; i < CHARSET; ++i) occs[i] = -1;
 
     for (i = 0; s[i] != '\0'; ++i){
         index = map_charset(s[i]);
 
-        if (eval[i] != '/' && occs[index] < 0) {            // '+' or '/'
-            --(occs[index]);                                // increase minimum
-        } else if (eval[i] == '+' && occs[index] >= 0) {    // '+'
-            ++(occs[index]);                                // increase exact
-        } else if (eval[i] == '/' && occs[index] < 0) {     // '/'
-            occs[index] = -(occs[index]) - 1;               // set exact
+        if (eval[i] != '/' && occs[index] < 0) {
+            --(occs[index]);
+        } else if (eval[i] == '+' && occs[index] >= 0) {
+            ++(occs[index]);
+        } else if (eval[i] == '/' && occs[index] < 0) {
+            occs[index] = -(occs[index]) - 1; 
         }
     }
 }
-
 
 void analyze_guess(char *ref, char *s, char *eval, int wordsize, int *occs, req_t *reqs){
     uint8_t counts[CHARSET] = {0};
     int i, index;
 
-    // count char occurrences in ref and handle perfect matches
     for(i = 0; i < wordsize; ++i){
         index  = map_charset(ref[i]);
         if (ref[i] != s[i]){
-            eval[i] = '\0';             // reset eval
+            eval[i] = '\0';
             ++(counts[index]);
         } else {
             eval[i] = '+';
@@ -305,7 +293,6 @@ void analyze_guess(char *ref, char *s, char *eval, int wordsize, int *occs, req_
         }
     }
 
-    // handle imperfect matches and exclusions
     for (i = 0; i < wordsize; ++i){
         if (eval[i] != '+'){
             index = map_charset(s[i]);
@@ -315,19 +302,14 @@ void analyze_guess(char *ref, char *s, char *eval, int wordsize, int *occs, req_
                 --(counts[index]);
             }
 
-            // get rid of impossible positions according to eval
             (reqs->pos)[index][i] = 0;
         }    
     }
 
-    // once eval is computed, get the occurrences it imposes
     calculate_occs(s, eval, occs);
-
-    // use occs to fix up requirements
     for (i = 0; i < wordsize; ++i){
         index = map_charset(s[i]);
 
-        // modify reqs->occs[index] if the new bounds are "stricter"
         if ((reqs->occs)[index] < 0                                  &&
             (occs[index] >= 0 || occs[index] < (reqs->occs)[index])
         ) (reqs->occs)[index] = occs[index];
@@ -337,7 +319,6 @@ void analyze_guess(char *ref, char *s, char *eval, int wordsize, int *occs, req_
 int check_prev(char *sfx, char *s, char *eval, int *occs, int depth){
     int i, index, count, res;
 
-    // once we run out of suffix, check that all occs are either -1 or 0
     if (sfx[0] == '\0'){
         for (i = 0; s[i] != '\0'; ++i){
             index = map_charset(s[i]);
@@ -346,7 +327,6 @@ int check_prev(char *sfx, char *s, char *eval, int *occs, int depth){
         return 1;
     }
 
-    // otherwise, check that sfx[0] is compatible with the bounds
     index = map_charset(sfx[0]);
     count = occs[index];
     if (( count == 0 )                              ||
@@ -378,7 +358,7 @@ int prune_prev(trie_t *trie, char *s, char *eval, int *occs, int depth){
 
     for (curr = trie; curr != NULL; curr = curr->next){
         
-        if ((curr->status)[0] == NO_PRUNE){  // don't consider pruned nodes
+        if ((curr->status)[0] == NO_PRUNE){
 
             if ((eval[depth] == '+' && (curr->status)[1] == target)  ||
                 (eval[depth] != '+' && (curr->status)[1] != target)
@@ -428,7 +408,6 @@ int prune_prev(trie_t *trie, char *s, char *eval, int *occs, int depth){
 int check_full(char *sfx, req_t *reqs, int depth){
     int i, index, count, res;
 
-    // once we run out of suffix, check that all occs are either -1 or 0
     if (sfx[0] == '\0'){
         for (i = 0; i < CHARSET; ++i){
             if ((reqs->occs)[i] != 0 && (reqs->occs)[i] != -1) return 0;
@@ -436,7 +415,6 @@ int check_full(char *sfx, req_t *reqs, int depth){
         return 1;
     }
 
-    // otherwise, check that sfx[0] is compatible with the bounds
     index = map_charset(sfx[0]);
     count = (reqs->occs)[index];
     if (( count == 0 )                                                      ||
@@ -469,7 +447,7 @@ int prune_full(trie_t *trie, req_t *reqs, int depth){
 
     for (curr = trie; curr != NULL; curr = curr->next){
         
-        if ((curr->status)[0] == NO_PRUNE){  // don't consider pruned nodes
+        if ((curr->status)[0] == NO_PRUNE){
 
             if ((target != '*' && (curr->status)[1] == target)  || (target == '*')) {
     
@@ -521,23 +499,23 @@ trie_t *initial_read(trie_t *trie, int wordsize){
     while (buff[0] != '+'){
         trie = insert(trie, buff);
 
-        getchar(); //trailing \n
+        getchar();
         safe_fgets(buff, wordsize);
     }
 
-    if (buff[1] == 'n'){    // +nuova_partita
+    if (buff[1] == 'n'){
         if (wordsize <= 14) while (getchar() != '\n');
-    } else {                // +inserisci_inizio
+    } else {
         if (wordsize <= 17) while (getchar() != '\n');
 
         safe_fgets(buff, wordsize);
         while (buff[0] != '+'){
             trie = insert(trie, buff);
 
-            getchar(); //trailing \n
+            getchar();
             safe_fgets(buff, wordsize);
         }
-        // dump remaining of +inserisci_fine, dump +nuova_partita
+
         if (wordsize <= 15) while (getchar() != '\n');
         while(getchar() != '\n');
     }
@@ -554,7 +532,7 @@ trie_t *handle_insert(trie_t *trie, int wordsize){
     while (buff[0] != '+'){
         trie = insert(trie, buff);
 
-        getchar(); //trailing \n
+        getchar();
         safe_fgets(buff, wordsize);
     }
     if (wordsize <= 15) while (getchar() != '\n');
@@ -574,7 +552,6 @@ trie_t *new_game(trie_t *trie, int wordsize){
 
     eval[wordsize] = '\0';
 
-    // grab reference word and number of guesses
     safe_fgets(ref, wordsize);
     getchar();
     safe_scanf(&guesses); 
@@ -584,7 +561,7 @@ trie_t *new_game(trie_t *trie, int wordsize){
 
         if(buff[0] == '+'){
     
-            if (buff[1] == 's'){            // +stampa_filtrate
+            if (buff[1] == 's'){
                 if (wordsize <= 16) while (getchar() != '\n');
 
                 if (insert_flag) {
@@ -593,7 +570,7 @@ trie_t *new_game(trie_t *trie, int wordsize){
                 }
                 print_trie(trie, wordsize);
 
-            } else if (buff[1] == 'i'){     // +inserisci_inizio
+            } else if (buff[1] == 'i'){
                 if (wordsize <= 17) while (getchar() != '\n');
     
                 trie = handle_insert(trie, wordsize);
@@ -603,21 +580,20 @@ trie_t *new_game(trie_t *trie, int wordsize){
 
         } else{
 
-            getchar(); // trailing newline for words
+            getchar();
 
-            if (strcmp(ref, buff) == 0) {           // guessed correctly
+            if (strcmp(ref, buff) == 0) {
                 puts("ok");
                 break;
-            } else if (search(trie, buff) == 0) {   // word not in dict
+            } else if (search(trie, buff) == 0) {
                 puts("not_exists");
             } else {
-                // first get the occs array and eval
                 analyze_guess(ref, buff, eval, wordsize, occs, reqs);
 
-                if (insert_flag) {          // previous command was insertion
+                if (insert_flag) {
                     count = prune_full(trie, reqs, 0);
                     insert_flag = 0;
-                } else if (prune_flag) {    // more than 1 possible word
+                } else if (prune_flag) {
                     count = prune_prev(trie, buff, eval, occs, 0);
                 }
 
@@ -640,7 +616,6 @@ trie_t *new_game(trie_t *trie, int wordsize){
             safe_fgets(dump, 17);
         }
 
-        // free/clear only when restarting
         free_req(reqs);
         clear_trie(trie);
     } return trie;
