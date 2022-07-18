@@ -7,8 +7,9 @@
 #include <string.h>
 
 #define CHARSET 64
-#define PRUNE 1
-#define NO_PRUNE 2
+#define PRUNE 3
+#define TEMP_PRUNE 2
+#define NO_PRUNE 1
 
 
 /*

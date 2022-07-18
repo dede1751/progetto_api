@@ -4,7 +4,8 @@
 #include <string.h>
 
 #define CHARSET 64
-#define PRUNE 1
+#define PRUNE 2
+#define TEMP_PRUNE 1
 #define NO_PRUNE 0
 
 
@@ -358,7 +359,7 @@ int prune_prev(trie_t *trie, char *s, char *eval, int *occs, int depth){
 
     for (curr = trie; curr != NULL; curr = curr->next){
         
-        if ((curr->status)[0] == NO_PRUNE){
+        if ((curr->status)[0] == NO_PRUNE){  // don't consider TEMP_PRUNE and PRUNE
 
             if ((eval[depth] == '+' && (curr->status)[1] == target)  ||
                 (eval[depth] != '+' && (curr->status)[1] != target)
@@ -396,6 +397,8 @@ int prune_prev(trie_t *trie, char *s, char *eval, int *occs, int depth){
                         total += prune_prev(curr->branch, s, eval, occs, depth + 1);
                         ++(occs[index]);
                     }
+
+                    if (total == 0) (curr->status)[0] = TEMP_PRUNE;
                 }
             } else (curr->status)[0] = PRUNE;
         }
@@ -447,7 +450,7 @@ int prune_full(trie_t *trie, req_t *reqs, int depth){
 
     for (curr = trie; curr != NULL; curr = curr->next){
         
-        if ((curr->status)[0] == NO_PRUNE){
+        if ((curr->status)[0] != PRUNE){
 
             if ((target != '*' && (curr->status)[1] == target)  || (target == '*')) {
     
@@ -483,6 +486,8 @@ int prune_full(trie_t *trie, req_t *reqs, int depth){
                         total += prune_full(curr->branch, reqs, depth + 1);
                         ++((reqs->occs)[index]);
                     }
+
+                    if ((curr->status)[0] == TEMP_PRUNE && total > 0) (curr->status)[0] = NO_PRUNE;
                 }
             } else (curr->status)[0] = PRUNE;
         }
@@ -565,8 +570,10 @@ trie_t *new_game(trie_t *trie, int wordsize){
                 if (wordsize <= 16) while (getchar() != '\n');
 
                 if (insert_flag) {
-                    prune_full(trie, reqs, 0);
+                    count = prune_full(trie, reqs, 0);
+        
                     insert_flag = 0;
+                    if (count == 1) prune_flag = 0;
                 }
                 print_trie(trie, wordsize);
 
@@ -575,7 +582,7 @@ trie_t *new_game(trie_t *trie, int wordsize){
     
                 trie = handle_insert(trie, wordsize);
                 insert_flag = 1;
-                if (!prune_flag) prune_flag = 1;
+                if (prune_flag == 0) prune_flag = 1;
             }
 
         } else{

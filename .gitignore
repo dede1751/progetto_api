@@ -2,8 +2,6 @@
 /debug
 /release
 /tests/dump.txt
-dum_e/dump.txt
-.vscode/configurationCache.log
+/.vscode
 .gitignore
-.vscode/targets.log
 vg_logfile.out
