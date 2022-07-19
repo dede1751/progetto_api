@@ -23,7 +23,6 @@ typedef struct reqs {
 
 void safe_scanf(int *);
 void safe_fgets(char *, int);
-int map_charset(char);
 
 trie_t *generate_branch(char);
 trie_t *get_child(trie_t *, char);
@@ -55,6 +54,15 @@ trie_t *handle_insert(trie_t *, int);
 trie_t *initial_read(trie_t *, int);
 trie_t *new_game(trie_t *, int);
 
+int conversion_table[128] = {
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, 0, -1, -1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, -1,
+    -1, -1, -1, -1, -1, -1, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
+    24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, -1, -1, -1, -1, 37, -1,
+    38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56,
+    57, 58, 59, 60, 61, 62, 63, -1, -1, -1, -1, -1
+};
 
 
 int main(){
@@ -78,15 +86,6 @@ void safe_fgets(char *s, int size){
 }
 void safe_scanf(int *x){
     if (scanf("%d\n", x) == 0) exit(EXIT_FAILURE);
-}
-
-
-int map_charset(char c){
-    if (c == '-') return 0;
-    else if (c >= '0' && c <= '9') return (c - 47);
-    else if (c >= 'A' && c <= 'Z') return (c - 54);
-    else if (c >= 'a' && c <= 'z') return (c - 59);
-    else return 37;
 }
 
 
@@ -267,7 +266,7 @@ void calculate_occs(char *s, char *eval, int *occs){
     for (i = 0; i < CHARSET; ++i) occs[i] = -1;
 
     for (i = 0; s[i] != '\0'; ++i){
-        index = map_charset(s[i]);
+        index = conversion_table[(int) s[i]];
 
         if (eval[i] != '/' && occs[index] < 0) {
             --(occs[index]);
@@ -284,7 +283,7 @@ void analyze_guess(char *ref, char *s, char *eval, int wordsize, int *occs, req_
     int i, index;
 
     for(i = 0; i < wordsize; ++i){
-        index  = map_charset(ref[i]);
+        index  = conversion_table[(int) ref[i]];
         if (ref[i] != s[i]){
             eval[i] = '\0';
             ++(counts[index]);
@@ -296,7 +295,7 @@ void analyze_guess(char *ref, char *s, char *eval, int wordsize, int *occs, req_
 
     for (i = 0; i < wordsize; ++i){
         if (eval[i] != '+'){
-            index = map_charset(s[i]);
+            index = conversion_table[(int) s[i]];
             if (counts[index] == 0) eval[i] = '/';
             else {
                 eval[i] = '|';
@@ -309,7 +308,7 @@ void analyze_guess(char *ref, char *s, char *eval, int wordsize, int *occs, req_
 
     calculate_occs(s, eval, occs);
     for (i = 0; i < wordsize; ++i){
-        index = map_charset(s[i]);
+        index = conversion_table[(int) s[i]];
 
         if ((reqs->occs)[index] < 0                                  &&
             (occs[index] >= 0 || occs[index] < (reqs->occs)[index])
@@ -322,13 +321,13 @@ int check_prev(char *sfx, char *s, char *eval, int *occs, int depth){
 
     if (sfx[0] == '\0'){
         for (i = 0; s[i] != '\0'; ++i){
-            index = map_charset(s[i]);
+            index = conversion_table[(int) s[i]];
             if (occs[index] != 0 && occs[index] != -1) return 0;
         }
         return 1;
     }
 
-    index = map_charset(sfx[0]);
+    index = conversion_table[(int) sfx[0]];
     count = occs[index];
     if (( count == 0 )                              ||
         (eval[depth] == '+' && sfx[0] != s[depth])  ||
@@ -359,13 +358,13 @@ int prune_prev(trie_t *trie, char *s, char *eval, int *occs, int depth){
 
     for (curr = trie; curr != NULL; curr = curr->next){
         
-        if ((curr->status)[0] == NO_PRUNE){  // don't consider TEMP_PRUNE and PRUNE
+        if ((curr->status)[0] == NO_PRUNE){
 
             if ((eval[depth] == '+' && (curr->status)[1] == target)  ||
                 (eval[depth] != '+' && (curr->status)[1] != target)
             ) {
     
-                index = map_charset((curr->status)[1]);
+                index = conversion_table[(int) (curr->status)[1]];
                 count = occs[index];
 
                 if (count == 0) (curr->status)[0] = PRUNE;
@@ -418,7 +417,7 @@ int check_full(char *sfx, req_t *reqs, int depth){
         return 1;
     }
 
-    index = map_charset(sfx[0]);
+    index = conversion_table[(int) sfx[0]];
     count = (reqs->occs)[index];
     if (( count == 0 )                                                      ||
         ((reqs->match)[depth] != '*' && sfx[0] != (reqs->match)[depth])     ||
@@ -454,7 +453,7 @@ int prune_full(trie_t *trie, req_t *reqs, int depth){
 
             if ((target != '*' && (curr->status)[1] == target)  || (target == '*')) {
     
-                index = map_charset((curr->status)[1]);
+                index = conversion_table[(int) (curr->status)[1]];
                 count = (reqs->occs)[index];
 
                 if (count == 0 || (reqs->pos)[index][depth] == 0) (curr->status)[0] = PRUNE;

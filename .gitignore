@@ -2,6 +2,6 @@
 /debug
 /release
 /tests/dump.txt
-/.vscode
+/.vscode/*
 .gitignore
 vg_logfile.out

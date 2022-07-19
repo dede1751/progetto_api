@@ -6,7 +6,7 @@
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Mon Jul 18 16:56:47 2022
+# Make data base, printed on Tue Jul 19 15:27:38 2022
 
 # Variables
 
@@ -57,9 +57,9 @@ DBGEXE = $(DBGDIR)/$(EXE)
 # automatic
 %F = $(notdir $%)
 # environment
-ALACRITTY_SOCKET = /run/user/1000/Alacritty-:0-2158.sock
+ALACRITTY_SOCKET = /run/user/1000/Alacritty-:0-895.sock
 # environment
-VSCODE_CODE_CACHE_PATH = /home/andrea/.config/Code/CachedData/92d25e35d9bf1a6b16f7d0758f25d48ace11e5b9
+VSCODE_CODE_CACHE_PATH = /home/andrea/.config/Code/CachedData/b06ae3b2d2dbfe28bca3134cc6be65935cdfea6a
 # environment
 XDG_SESSION_PATH = /org/freedesktop/DisplayManager/Session0
 # environment
@@ -97,7 +97,7 @@ MAKEFILE_LIST := makefile
 # makefile (from 'makefile', line 27)
 RELOBJS = $(addprefix $(RELDIR)/, $(OBJS))
 # environment
-VSCODE_PID = 2475
+VSCODE_PID = 1101
 # environment
 XDG_SESSION_TYPE = x11
 # automatic
@@ -153,7 +153,7 @@ XDG_SEAT = seat0
 # environment
 XDG_CURRENT_DESKTOP = i3
 # environment
-ALACRITTY_LOG = /tmp/Alacritty-2158.log
+ALACRITTY_LOG = /tmp/Alacritty-895.log
 # environment
 LS_COLORS = 
 # automatic
@@ -211,7 +211,7 @@ HOME = /home/andrea
 # environment
 ELECTRON_RUN_AS_NODE = 1
 # environment
-VSCODE_IPC_HOOK = /run/user/1000/vscode-4ee681d6-1.69.0-main.sock
+VSCODE_IPC_HOOK = /run/user/1000/vscode-4ee681d6-1.69.1-main.sock
 # environment
 TERM = alacritty
 # environment
@@ -285,7 +285,6 @@ clean:
 #  Implicit rule search has not been done.
 #  File does not exist.
 #  File has not been updated.
- 
 #  recipe to execute (from 'makefile', line 66):
 	rm -f $(RELEXE) $(RELOBJS) $(DBGEXE) $(DBGOBJS)
 
@@ -364,6 +363,7 @@ prep:
 # Load=8/32=25%, Rehash=0, Collisions=1/13=8%
 #  recipe to execute (from 'makefile', line 61):
 	@mkdir -p $(DBGDIR) $(RELDIR)
+ 
 
 # Not a target:
 debug/main.o:
@@ -415,6 +415,6 @@ release/main.o:
 # strcache performance: lookups = 68 / hit rate = 45%
 # hash-table stats:
 # Load=37/8192=0%, Rehash=0, Collisions=0/68=0%
-# Finished Make data base on Mon Jul 18 16:56:47 2022
+# Finished Make data base on Tue Jul 19 15:27:38 2022
 
  

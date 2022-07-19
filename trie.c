@@ -10,7 +10,11 @@ static void split_leaves(trie_t *, char *);
 static void print(trie_t *, char *, int);
 
 
-
+/**
+ * @brief Allocates a branch node
+ * @param c         letter in the branch
+ * @return trie_t*  branch node
+ */
 static trie_t *generate_branch(char c){
     trie_t *new = (trie_t *)malloc(sizeof(trie_t));
     char *status = (char *)malloc(2*sizeof(char));
@@ -24,17 +28,34 @@ static trie_t *generate_branch(char c){
     return new;
 }
 
+/**
+ * @brief Get the node for letter "tgt" at the current height
+ * @param trie      trie node (first node of the "level")
+ * @param tgt       letter to search for
+ * @return trie_t*  trie node for tgt or NULL if it's not found
+ */
 static trie_t *get_child(trie_t *trie, char tgt){
     int c;
 
     for (; trie != NULL; trie = trie->next){
         c = (trie->status)[1];
-        if (c > tgt) return NULL;
-        else if (c == tgt) return trie;
+        if (c > tgt) return NULL;       // surpassed tgt, not found
+        else if (c == tgt) return trie; // found
     }
     return NULL;
 }
 
+/**
+ * @brief Allocates new trie node and places it in the correct spot
+ * 
+ *  Allocates the new node, navigates in the level until the correct ordered
+ *  spot is reached and links it to the others. The status string must be
+ *  externally supplied.
+ * 
+ * @param trie      trie node (first node of the "level")
+ * @param status    status string of the new node
+ * @return trie_t*  first node of the level (can be different from trie)
+ */
 static trie_t *add_child(trie_t *trie, char *status){
     trie_t *prev = NULL, *curr = trie, *new = (trie_t *)malloc(sizeof(trie_t));
     char tgt = status[1];
@@ -57,6 +78,13 @@ static trie_t *add_child(trie_t *trie, char *status){
     }
 }
 
+/**
+ * @brief Allocates and inserts in the correct place a leaf node for word.
+ * @param trie      trie node (first node of the "level")
+ * @param word      suffix of the word being inserted
+ * @param p         prune value for the new leaf
+ * @return trie_t*  first node of the level (can be different from trie)
+ */
 static trie_t *insert_leaf(trie_t *trie, char *word, char p){
     int len = strlen(word);
     char *status = (char *)malloc((len + 2)*sizeof(char));
@@ -68,6 +96,21 @@ static trie_t *insert_leaf(trie_t *trie, char *word, char p){
     return add_child(trie, status);
 }
 
+/**
+ * @brief Transforms a leaf into a branch to add the new word.
+ * 
+ *  When traveling down the tree, leaves can be found along our word's "path".
+ *  Words like "abcd" and "abef" will collide at "b" if inserted in that order.
+ *  In this case, when inserting "abef", we will get "abcd" from get_child().
+ *  We substitute the "abcd" node with a branch for "b", while also saving the
+ *  prune value for the leaf (this is important, we don't know if the pruning
+ *  was done solely on the "b" or due to the rest of the word). We then add
+ *  both word and the old leaf's status as leaves in the level below "b", and
+ *  the old leaf keeps its prune value.
+ * 
+ * @param trie      leaf node to split
+ * @param word      suffix of the word to insert
+ */
 static void split_leaves(trie_t *trie, char *word){
     trie_t *tmp_trie = trie;
     char *tmp_sts = trie->status, *sfx = trie->status + 2*sizeof(char);
@@ -87,6 +130,17 @@ static void split_leaves(trie_t *trie, char *word){
     tmp_trie->status = realloc(tmp_sts, 2*sizeof(char));
 }
 
+/**
+ * @brief Inserts string into trie and returns updated trie
+ * 
+ *  First travels down the trie using get_child() and either reaches a leaf or
+ *  does not find an existing path. In the first case it splits the leaf, in the
+ *  second it simply adds the remaining suffix of the word as a leaf.
+ * 
+ * @param root      root of the trie to insert the string in
+ * @param word      word to save on the trie
+ * @return trie_t*  returns the new root
+ */
 trie_t *insert(trie_t *root, char *word){
     trie_t *child = get_child(root, word[0]), *trie = root, *prev_branch = NULL;
 
@@ -106,7 +160,16 @@ trie_t *insert(trie_t *root, char *word){
     return root;
 }
 
-
+/**
+ * @brief Searches trie for target string
+ * 
+ *  Travels down like insert, but either does not find a path or simply checks
+ *  the suffix whenever it finds a leaf.
+ * 
+ * @param root      root of the trie to search the string in
+ * @param word      word to search in the trie
+ * @return int      1 = found  0 = not found
+ */
 int search(trie_t *root, char *word){
     root = get_child(root, word[0]);
 
@@ -123,7 +186,18 @@ int search(trie_t *root, char *word){
     }
 }
 
-
+/**
+ * @brief Recursively prints the trie (only not pruned nodes)
+ *
+ *  Iterate through the current "level" of the trie:
+ * 
+ *      - Base case -->  leaf node, print word+status
+ *      - Rec call  -->  add current letter to word, call print one branch down
+ * 
+ * @param trie      first node of current "level"
+ * @param word      prefix of the word to print
+ * @param depth     current "level" (also length of word)
+ */
 static void print(trie_t *trie, char *word, int depth){
 
     while (trie != NULL){
@@ -141,6 +215,11 @@ static void print(trie_t *trie, char *word, int depth){
     }
 }
 
+/**
+ * @brief Wrapper for print
+ * @param trie      root of the trie to print
+ * @param wordsize  size of the words in the trie
+ */
 void print_trie(trie_t *trie, int wordsize){
     char *word = (char *) calloc(wordsize + 1, sizeof(char));
 
@@ -148,7 +227,10 @@ void print_trie(trie_t *trie, int wordsize){
     free(word);
 }
 
-
+/**
+ * @brief Recursively set all trie nodes to NO_PRUNE
+ * @param trie      root of the trie to clear
+ */
 void clear_trie(trie_t *trie){
 
     if (trie->next != NULL) clear_trie(trie->next);
