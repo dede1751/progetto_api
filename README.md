@@ -1,32 +1,24 @@
-# Prova Finale di Algoritmi e Strutture Dati - a.a. 2021-2022   (30L)
-__WordChecker__: Lo scopo del progetto è implementare un gioco simile a Wordle che sia cosciente delle limitazioni imposte ad ogni tentativo:
-  * Il gioco inizia ricevendo in ingresso un dizionario di parole a lunghezza fissa, seguito da una sequenza di partite.
-  * Ogni partita contiene i seguenti comandi:
-      - _+nuova_partita_    : Delimita l'inizio di una partita, seguito dalla stringa da indovinare e il numero di tentativi
-      - _+inserisci_inizio_ : Seguito da lista di parole da aggiungere, chiusa da +inserisci_fine. Può trovarsi all'interno di una partita o trs una partita e la successiva.
-      - _+stampa_filtrate_  : Stampa in ordine lessicografico tutte le parole del dizionario compatibili con le limitazioni apprese dopo ogni tentativo.
-  * Come in wordle, ad ogni tentativo di indovinare si apprende, per ogni lettera, qualora questa lettera fosse contenuta nella parola da indovinare. Nella valutazione
-    viene anche inclusa informazione riguardante il numero minimo ed esatto di occorrenze di ciascuna lettera mediante l'uso di '|'.
-      - ref&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;&nbsp;&nbsp;abcabcabcabc
-      - guess&nbsp;&nbsp;=&nbsp;&nbsp;&nbsp;&nbsp;bbaabccbccbc
-      - eval&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;&nbsp;&nbsp;/+|+++|++/++
-      
-__Implementazione__:
-  * L'input viene ricevuto da file, il folder tests è preso dalla repo di [federico123579](https://github.com/federico123579/APi2022-Project-tools) che ringrazio. Per
-    testare il programma e valutare l'output usare i seguenti comandi nella cartella della repo:
-    
+# Algorithms and Data Structures - Final Project 2021-2022   (30L)
+__WordChecker__: The aim of the project is to implement a game similar to wordle that is also conscious of the limitations imposed by each guess
+
+  * The game starts by receiving a dictionary of fixed length words, followed by a sequence of games.
+  * Each game contains the following commands:
+      - _+nuova_partita_    : Precedes the start of a game, followed by the word to guess and the amout of guesses allowed.
+      - _+inserisci_inizio_ : Followed by a list of words to be added to the dictionary, ended by _+inserisci_fine_. Can also be found between games.
+      - _+stampa_filtrate_  : Prints in lexicographical order all words from the dictionary compatible with the limitations learned from previous guesses.
+  * With each guess, more information is learned about the reference word, in the form of exact and minimum occurrences of a certain character, and positions in which a certain character must or must not appear. After each guess, the amount of words still compatible with all the bounds must be printed.
+
+__Implementation__:
+  * Input is redirected from a file to stdin. Test files with correct output are available on [federico123579's repo](https://github.com/federico123579/APi2022-Project-tools) (they were a great help to me) and much larger tests are on my [OneDrive](https://polimi365-my.sharepoint.com/:u:/g/personal/10726194_polimi_it/EesHKg7pkuxIotu0G6qn9h4B2j39QcH9fF3gUnHmLQaxdg?e=KQAFr2). To test the program simply input this from the src directory or run gcc on the monolithic submission.c (use debug build for profiling)
   ```
   make all
-  ./release/build < tests/(input_dir)/(input_file).txt > tests dump.txt
-  diff tests/dump.txt tests/(input_dir)/(input_file).output.txt
+  ./release/build < (test_path).(test_name).txt > dump.txt
+  diff dump.txt (test_path).(test_name).output.txt
   ```
-  * Nella repo sono presenti folder per implementazioni mediante hash table e rbtree come dizionari che si sono rivelate troppo lente/ingombranti. Queste implementazioni
-    dovrebbero essere funzionanti ma non ne garantisco la correttezza, in quanto abbandonate una volta capito fosse impossibile passare con esse.
-
-  * __Trie Dinamico parzialmente compresso__  :    L'uso di un trie come dizionario rende estremamente efficace il filtraggio dopo ogni tentativo, mantenendo ricerca ed inserimento in tempo costante. La scelta di usare
-   una struttura simil-lista dinamica nasce dalle limitazioni di spazio, e per lo stesso motivo il trie viene anche compresso parzialmente, solo alle foglie (ovvero non
-   esistono nodi interni, o "rami", che rappresentino più di una lettera, ma le foglie possono contenere un intero suffisso della parola). Risultati:
-
+  * In prior commits I have (broken) implementations using RBTrees and Hash Tables, which both seemed slow at first glance but have been proven capable of passing the project.
+  * __Compressed Ternary Search Tree__ : The use of a trie-like structure allows for very efficient filtering of the dictionary, since branches can be pruned without having to descend to the leaves, and requires no compromise on insertion and search times. A simple trie would not pass due to size limits, and for the same reasons the tree must be compressed at the leaves (this means that while branches always represent a single letter, leaves can represent a suffix)
+  * Note that, due to word sizes in the exams tests, the program assumes words to be at most 256-character long and have at most 127 occurrences of the same character. This clearly isn't always the case, but the use of longer integers would not in any way interfere with performance.
+  
       - UPTO18-S1 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.634s &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 17.6 MiB
       - UPTO30-S1 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 16.670s &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 130.0 MiB\
         UPTO30-S2 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 15.140s &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 130.0 MiB\
