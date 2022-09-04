@@ -4,7 +4,7 @@
  * @date 19 July 2022
  * @brief Header containing trie definition and operations
  *
- *  The solution makes use of a dynamic trie to easily filter the words. The basic
+ *  The solution makes use of a trie (TST) to easily filter the words. The basic
  *  trie functionality is implemented in this module, while the rest of the more
  *  advanced pruning functions are left to the game module since they make use
  *  of the requirements struct.
@@ -20,7 +20,6 @@
  */
 #ifndef TRIE_H_
 #define TRIE_H_
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -55,7 +54,7 @@
  *    - for debugging purposes it uses the values PRUNE/TEMP_PRUNE/NO_PRUNE, the
  *      special TEMP_PRUNE value is used to prune branches with no valid leaves
  *      under them. Since these are not properly pruned, this must be reset at
- *      every insertion, and is handled by prune_full
+ *      every insertion, and is handled by prune_trie
  * 
  *
  *  * NODES:
@@ -84,7 +83,7 @@ typedef struct trie {
 } trie_t;
 
 /**
- * @brief Inserts string into trie and returns updated trie     O(1)
+ * @brief Inserts string into trie and returns updated trie     O(k)
  * 
  *  To initialize the tree pass a NULL node as the root. All inserted words must
  *  be unique, this is a requirement for the project input.
@@ -96,7 +95,7 @@ typedef struct trie {
 trie_t *insert(trie_t *, char *);
 
 /**
- * @brief Searches trie for target string                       O(1)
+ * @brief Searches trie for target string                       O(k)
  * @param root      root of the trie to search the string in
  * @param word      word to search in the trie
  * @return int      1 = found  0 = not found
@@ -108,7 +107,7 @@ int search(trie_t *, char *);
  * @param trie      root of the trie to print
  * @param wordsize  size of the words in the trie
  */
-void print_trie(trie_t *, int);
+void print_trie(trie_t *, uint8_t);
 
 /**
  * @brief Resets prune values in the trie to NO_PRUNE           O(n)

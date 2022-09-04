@@ -7,9 +7,9 @@ __WordChecker__: Lo scopo del progetto è implementare un gioco simile a Wordle 
       - _+stampa_filtrate_  : Stampa in ordine lessicografico tutte le parole del dizionario compatibili con le limitazioni apprese dopo ogni tentativo.
   * Come in wordle, ad ogni tentativo di indovinare si apprende, per ogni lettera, qualora questa lettera fosse contenuta nella parola da indovinare. Nella valutazione
     viene anche inclusa informazione riguardante il numero minimo ed esatto di occorrenze di ciascuna lettera mediante l'uso di '|'.
-      - ref   = abcabcabcabc
-      - guess = bbaabccbccbc
-      - eval  = /+|+++|++/++
+      - ref&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;&nbsp;&nbsp;abcabcabcabc
+      - guess&nbsp;&nbsp;=&nbsp;&nbsp;&nbsp;&nbsp;bbaabccbccbc
+      - eval&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;&nbsp;&nbsp;/+|+++|++/++
       
 __Implementazione__:
   * L'input viene ricevuto da file, il folder tests è preso dalla repo di [federico123579](https://github.com/federico123579/APi2022-Project-tools) che ringrazio. Per

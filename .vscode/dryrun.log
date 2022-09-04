@@ -1,0 +1,13 @@
+/usr/bin/make all --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/home/andrea/Documents/progetto_api'
+mkdir -p debug release
+gcc -c -Wall -Werror -Wextra -O2 -DNDEBUG -o release/trie.o trie.c
+gcc -c -Wall -Werror -Wextra -O2 -DNDEBUG -o release/game.o game.c
+gcc -c -Wall -Werror -Wextra -O2 -DNDEBUG -o release/main.o main.c
+gcc -Wall -Werror -Wextra -O2 -DNDEBUG -o release/build release/trie.o release/game.o release/main.o
+gcc -c -Wall -Werror -Wextra -g3 -DDEBUG -o debug/trie.o trie.c
+gcc -c -Wall -Werror -Wextra -g3 -DDEBUG -o debug/game.o game.c
+gcc -c -Wall -Werror -Wextra -g3 -DDEBUG -o debug/main.o main.c
+gcc -Wall -Werror -Wextra -g3 -DDEBUG -o debug/build debug/trie.o debug/game.o debug/main.o
+make: Leaving directory '/home/andrea/Documents/progetto_api'
+ 

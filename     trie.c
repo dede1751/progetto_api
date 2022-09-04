@@ -7,7 +7,7 @@ static trie_t *add_child(trie_t *, char *);
 static trie_t *insert_leaf(trie_t *, char *, char);
 static void split_leaves(trie_t *, char *);
 
-static void print(trie_t *, char *, int);
+static void print(trie_t *, char *, uint8_t);
 
 
 /**
@@ -35,7 +35,7 @@ static trie_t *generate_branch(char c){
  * @return trie_t*  trie node for tgt or NULL if it's not found
  */
 static trie_t *get_child(trie_t *trie, char tgt){
-    int c;
+    char c;
 
     for (; trie != NULL; trie = trie->next){
         c = (trie->status)[1];
@@ -198,7 +198,7 @@ int search(trie_t *root, char *word){
  * @param word      prefix of the word to print
  * @param depth     current "level" (also length of word)
  */
-static void print(trie_t *trie, char *word, int depth){
+static void print(trie_t *trie, char *word, uint8_t depth){
 
     while (trie != NULL){
         if ((trie->status)[0] == NO_PRUNE){
@@ -220,7 +220,7 @@ static void print(trie_t *trie, char *word, int depth){
  * @param trie      root of the trie to print
  * @param wordsize  size of the words in the trie
  */
-void print_trie(trie_t *trie, int wordsize){
+void print_trie(trie_t *trie, uint8_t wordsize){
     char *word = (char *) calloc(wordsize + 1, sizeof(char));
 
     print(trie, word, 0);

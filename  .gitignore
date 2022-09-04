@@ -1,0 +1,7 @@
+/.DS_Store
+/debug
+/release
+/tests/dump.txt
+/.vscode/*
+.gitignore
+vg_logfile.out

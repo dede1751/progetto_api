@@ -24,6 +24,8 @@
  * 
  *      REQUIREMENTS:
  *
+ *  - ref:              reference string for the current game
+ * 
  *  - match[i] = '*'    if the exact value of the i-th position hasn't been found
  *    match[i] = char   if char has been discovered
  * 
@@ -50,6 +52,7 @@
  *    pos[char][i] = 0  char cannot occupy i-th position
  */
 typedef struct reqs {
+    char *ref;
     char *match;
     int8_t occs[CHARSET];
     uint8_t *pos[CHARSET];
@@ -57,7 +60,7 @@ typedef struct reqs {
 
 
 // needed for errorless compilation, used only for wordsize outside
-void safe_scanf(int *);
+void safe_scanf(uint8_t *);
 
 /**
  * @brief Reads initial dictionary and returns filled trie
@@ -70,20 +73,18 @@ void safe_scanf(int *);
  * @param wordsize  size of the words in input(read previously)
  * @return trie_t*  root of the filled dictionary
  */
-trie_t *initial_read(trie_t *, int);
+trie_t *initial_read(trie_t *, uint8_t);
 
 /**
  * @brief Performs a full game loop
  * 
  *  Input buffer must start with ref string, and clears the input up until the
- *  next +nuova_partita(included). If the input ends it returns NULL. In this
- *  case it does not free the requirements struct or the trie, as it is simply
- *  a waste of time.
+ *  next +nuova_partita(included). If the input ends it exits succesfully
  * 
  * @param trie      root of the dictionary
  * @param wordsize  size of the words in input
- * @return trie_t*  root of the updated trie or NULL if game is over
+ * @return trie_t*  root of the updated trie
  */
-trie_t *new_game(trie_t *, int);
+trie_t *new_game(trie_t *, uint8_t);
 
 #endif
